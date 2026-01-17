@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oteller - EgeLife Otel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .otel-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .otel-card {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .otel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .otel-adi {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .otel-adres {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .nav-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 10px 20px;
+            background: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Oteller Listesi</h1>
+
+        <div class="otel-list">
+            {{#each oteller}}
+                <div class="otel-card">
+                    <div class="otel-adi">{{.otel_adi}}</div>
+                    <div class="otel-adres">{{.adres}}</div>
+                </div>
+            {{/each}}
+        </div>
+
+        <div class="nav-links">
+            <a href="/dashboard">Ana Sayfa</a>
+            <a href="/istatistik">İstatistikler</a>
+            <a href="/login">Çıkış</a>
+        </div>
+    </div>
+</body>
+</html>
+

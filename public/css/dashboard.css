@@ -1,0 +1,585 @@
+/* ============================================
+   MODERN POWERBI STYLE DASHBOARD CSS
+   Color Palette: #0078D4 (PowerBI Blue), #323130, #F3F2F1
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    background: #F3F2F1;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #323130;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ============================================
+   DASHBOARD WRAPPER
+   ============================================ */
+.dashboard-wrapper {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ============================================
+   SIDEBAR - PowerBI Style
+   ============================================ */
+.sidebar {
+    width: 180px;
+    background: #323130;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    position: fixed;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 28px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+}
+
+.sidebar-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 400;
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 20px 12px;
+    overflow-y: auto;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    margin-bottom: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.menu-item.active {
+    background: #0078D4;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 120, 212, 0.3);
+}
+
+.menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #ffffff;
+    border-radius: 0 3px 3px 0;
+}
+
+.menu-text {
+    font-size: 14px;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main-content {
+    flex: 1;
+    margin-left: 180px;
+    display: flex;
+    flex-direction: column;
+    background: #F3F2F1;
+}
+
+/* ============================================
+   HEADER - PowerBI Style
+   ============================================ */
+.header {
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 20px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    z-index: 100;
+    position: sticky;
+    top: 0;
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #323130;
+    letter-spacing: -0.4px;
+}
+
+.header .logout-btn {
+    color: #323130;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    background: #F3F2F1;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header .logout-btn:hover {
+    background: #0078D4;
+    color: #ffffff;
+    border-color: #0078D4;
+    box-shadow: 0 2px 4px rgba(0, 120, 212, 0.2);
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+.content-area {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: #F3F2F1;
+}
+
+.content-title {
+    font-size: 24px;
+    color: #323130;
+    margin-bottom: 32px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+/* ============================================
+   KPI CARDS - PowerBI Style
+   ============================================ */
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    max-height: 110px;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 8px 8px 0 0;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kpi-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.kpi-card.kpi-blue {
+    border-top: 4px solid #0078D4;
+}
+
+.kpi-card.kpi-blue::before {
+    background: #0078D4;
+}
+
+.kpi-card.kpi-blue .kpi-icon {
+    color: #0078D4;
+}
+
+.kpi-card.kpi-red {
+    border-top: 4px solid #D13438;
+}
+
+.kpi-card.kpi-red::before {
+    background: #D13438;
+}
+
+.kpi-card.kpi-red .kpi-icon {
+    color: #D13438;
+}
+
+.kpi-card.kpi-orange {
+    border-top: 4px solid #FF8C00;
+}
+
+.kpi-card.kpi-orange::before {
+    background: #FF8C00;
+}
+
+.kpi-card.kpi-orange .kpi-icon {
+    color: #FF8C00;
+}
+
+.kpi-card.kpi-green {
+    border-top: 4px solid #107C10;
+}
+
+.kpi-card.kpi-green::before {
+    background: #107C10;
+}
+
+.kpi-card.kpi-green .kpi-icon {
+    color: #107C10;
+}
+
+.kpi-label {
+    font-size: 11px;
+    color: #605E5C;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+}
+
+.kpi-value {
+    font-size: 16px;
+    color: #323130;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    word-break: break-word;
+}
+
+.kpi-hotel-name {
+    font-size: 18px;
+    color: #323130;
+    font-weight: 600;
+    margin-top: 2px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* ============================================
+   CHARTS CONTAINER - PowerBI Style
+   ============================================ */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 0;
+}
+
+.chart-box {
+    background: #ffffff;
+    padding: 1.2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chart-card {
+    background: #ffffff;
+    padding: 1.2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chart-box:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.chart-box-full {
+    grid-column: 1 / -1;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #F3F2F1;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #323130;
+    letter-spacing: -0.3px;
+}
+
+.year-select {
+    padding: 10px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    font-size: 14px;
+    color: #323130;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    min-width: 140px;
+    font-family: inherit;
+}
+
+.year-select:hover {
+    border-color: #0078D4;
+    background: #F3F2F1;
+}
+
+.year-select:focus {
+    outline: none;
+    border-color: #0078D4;
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+}
+
+.chart-container {
+    position: relative;
+    height: 360px;
+    padding: 12px 0;
+}
+
+.chart-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #605E5C;
+}
+
+.placeholder-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.placeholder-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #605E5C;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1600px) {
+    .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1400px) {
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1200px) {
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 180px;
+    }
+
+    .main-content {
+        margin-left: 180px;
+    }
+
+    .content-area {
+        padding: 1rem;
+    }
+    
+    .kpi-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .header {
+        padding: 16px 1rem;
+    }
+    
+    .content-title {
+        font-size: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* ============================================
+   SCROLLBAR STYLING - PowerBI Style
+   ============================================ */
+.sidebar-menu::-webkit-scrollbar,
+.content-area::-webkit-scrollbar {
+    width: 10px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track,
+.content-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.content-area::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.content-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   CHART.JS CUSTOM STYLING
+   ============================================ */
+/* Chart.js legend styling */
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* ============================================
+   ADDITIONAL STYLES FOR OTHER PAGES
+   ============================================ */
+.content-box {
+    background: #ffffff;
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.year-selector {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.year-selector label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #323130;
+}
+
+.chart-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.chart-info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chart-info-item:last-child {
+    border-bottom: none;
+}
+
+.chart-info-label {
+    font-weight: 500;
+    color: #323130;
+}
+
+.chart-info-value {
+    color: #605E5C;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #605E5C;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+@media (max-width: 1200px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}

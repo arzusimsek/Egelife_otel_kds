@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EgeLife Otel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EgeLife Otel</div>
+                <div class="sidebar-subtitle">Karar Destek Sistemi</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/dashboard" class="menu-item active">
+                    <span class="menu-text">Anasayfa</span>
+                </a>
+                <a href="/musteri-analizi" class="menu-item">
+                    <span class="menu-text">Müşteri Analizi</span>
+                </a>
+                <a href="/oda-analizi" class="menu-item">
+                    <span class="menu-text">Oda Analizi</span>
+                </a>
+                <a href="/kampanya-raporu" class="menu-item">
+                    <span class="menu-text">Kampanya Raporu</span>
+                </a>
+                <a href="/memnuniyet-raporu" class="menu-item">
+                    <span class="menu-text">Memnuniyet Raporu</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">EgeLife Otel</div>
+                <div>
+                    <a href="/login" class="logout-btn">Çıkış</a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <h1 class="content-title">Yıllık Yönetici Özeti (2025)</h1>
+
+                <!-- YENİ: STRATEJİK KARAR PANELİ (Net Yönetim Kararları) -->
+                {{#if hasDecisions}}
+                <div
+                    style="margin-bottom: 30px; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e1dfdd;">
+                    <h2
+                        style="margin-top: 0; margin-bottom: 20px; font-size: 20px; color: #323130; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 24px;">⚖️</span> Yönetim Kurulu İçin Onay Bekleyen Stratejik Kararlar
+                    </h2>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+                        {{#each decisions}}
+                        <div
+                            style="border: {{.containerBorder}}; border-left: 5px solid {{.borderLeftColor}}; border-radius: 6px; padding: 20px; background-color: {{.bgColor}};">
+
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                                <h3
+                                    style="margin: 0; font-size: 17px; font-weight: 600; color: #201f1e; display: flex; align-items: center; gap: 8px;">
+                                    {{.icon}} {{.title}}
+                                </h3>
+                                <span
+                                    style="background: {{.badgeColor}}; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: bold;">
+                                    {{.badgeText}}
+                                </span>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-size: 13px; color: #605e5c; margin-bottom: 4px;">GEREKÇE (VERİ):</div>
+                                <div style="font-size: 14px; color: #323130; font-weight: 500;">{{.reason}}</div>
+                            </div>
+
+                            <div
+                                style="background-color: #f3f2f1; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <div style="font-size: 13px; color: #605e5c; margin-bottom: 4px;">ÖNERİLEN KARAR:</div>
+                                <div style="font-size: 15px; color: #000; font-weight: 600;">{{.action}}</div>
+                            </div>
+
+                            <div
+                                style="font-size: 13px; color: #0078d4; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                                <span>📈</span> {{.impact}}
+                            </div>
+
+                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                <button
+                                    style="flex: 1; padding: 8px; background-color: {{.btnColor}}; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    Kararı Onayla
+                                </button>
+                                <button
+                                    style="padding: 8px 15px; background-color: #fff; color: #323130; border: 1px solid #8a8886; border-radius: 4px; cursor: pointer;">
+                                    Detay Gör
+                                </button>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/if}}
+
+                <!-- KPI Cards -->
+                <div class="kpi-cards">
+                    <div class="kpi-card kpi-blue">
+                        <div class="kpi-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="kpi-content">
+                            <div class="kpi-label" id="kpiLabelGelir">{{kpi2025.yil}} Toplam Gelir</div>
+                            <div class="kpi-value" id="kpiToplamGelir">${{kpi2025.toplamGelir}}</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-red">
+                        <div class="kpi-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                        <div class="kpi-content">
+                            <div class="kpi-label" id="kpiLabelMaliyet">{{kpi2025.yil}} Toplam Maliyet</div>
+                            <div class="kpi-value" id="kpiToplamMaliyet">${{kpi2025.toplamMaliyet}}</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-orange">
+                        <div class="kpi-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="kpi-content">
+                            <div class="kpi-label" id="kpiLabelEnKarli">{{kpi2025.yil}} En Karlı Otel</div>
+                            <div class="kpi-hotel-name" id="kpiEnKarliOtel">{{kpi2025.enKarliOtel}}</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <div class="kpi-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                        <div class="kpi-content">
+                            <div class="kpi-label" id="kpiLabelEnAzKarli">{{kpi2025.yil}} En Az Karlı Otel</div>
+                            <div class="kpi-hotel-name" id="kpiEnAzKarliOtel">{{kpi2025.enAzKarliOtel}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <!-- Grafik 1: Yıllara Göre Gelir-Gider-Kar -->
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <div class="chart-title">Yıllara Göre Gelir-Gider-Kar ($)</div>
+                            <select id="yearSelect1" class="year-select">
+                                <option value="all">Tüm Yıllar</option>
+                                {{#each yillar}}
+                                <option value="{{.yil}}">{{.yil}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gelirGiderKarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Grafik 2: Otellerin Yıllara Göre Kar -->
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <div class="chart-title">Otellerin Yıllara Göre Kar ($)</div>
+                            <select id="yearSelect2" class="year-select">
+                                <option value="all">Tüm Yıllar</option>
+                                {{#each yillar}}
+                                <option value="{{.yil}}">{{.yil}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="otellerKarChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Otel Bazlı Aylık Finansal Trendler (Line Chart Grid) -->
+                <div class="chart-header"
+                    style="margin-top: 40px; border-bottom: 2px solid #e1dfdd; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="chart-title" style="font-size: 20px;">Otellerin Finansal Performansı (Aylık Kar vs
+                        Maliyet)</div>
+                    <select id="yearSelect3" class="year-select">
+                        <option value="2025" selected>2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                </div>
+
+                <div id="hotelFinancialsGrid" class="charts-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin-top: 15px; margin-bottom: 30px;">
+                    <!-- Dinamik olarak doldurulacak -->
+                    <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #605e5c;">Grafikler
+                        yükleniyor...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let gelirGiderKarChart = null;
+        let otellerKarChart = null;
+        // let allHotelsFinancialsChart = null; // Artık kullanılmıyor
+        let multiCharts = []; // Grid içindeki chart instance'larını tutmak için
+
+        // KPI verilerini yükle
+        async function loadKPI2025() {
+            try {
+                console.log('KPI verileri yükleniyor...');
+                const response = await fetch('/api/kpi-2025');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('KPI verileri:', data);
+
+                if (!data) return;
+
+                // Verileri güncelle
+                // Yıl bilgisini güncelle
+                const yilElementleri = document.querySelectorAll('[id^="kpiLabel"]');
+                yilElementleri.forEach(el => {
+                    const originalText = el.innerText;
+                    if (data.yil && !originalText.includes(data.yil)) {
+                        el.innerText = data.yil + ' ' + originalText.replace(/^\d+\s+/, '');
+                    }
+                });
+
+                // Değerleri güncelle
+                if (document.getElementById('kpiToplamGelir'))
+                    document.getElementById('kpiToplamGelir').innerText = '$' + data.toplamGelir;
+
+                if (document.getElementById('kpiToplamMaliyet'))
+                    document.getElementById('kpiToplamMaliyet').innerText = '$' + data.toplamMaliyet;
+
+                if (document.getElementById('kpiEnKarliOtel'))
+                    document.getElementById('kpiEnKarliOtel').innerText = data.enKarliOtel;
+
+                if (document.getElementById('kpiEnAzKarliOtel'))
+                    document.getElementById('kpiEnAzKarliOtel').innerText = data.enAzKarliOtel;
+
+            } catch (error) {
+                console.error('KPI yükleme hatası:', error);
+            }
+        }
+
+        // Grafik 1: Yıllara Göre Gelir-Gider-Kar
+        async function loadGelirGiderKarChart(selectedYear = 'all') {
+            try {
+                const response = await fetch('/api/yillara-gore-gelir-gider-kar');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                if (!data || data.length === 0) return;
+
+                // Max Y ayarı vb. (Mevcut kod aynen kalabilir veya özetlenebilir)
+                const allMax = Math.max(...data.map(d => Math.max(d.gelir, d.gider, d.kar)));
+                let fixedYAxisMax = Math.ceil(allMax / 100000) * 100000 * 1.2;
+
+                let filteredData = (selectedYear !== 'all') ? data.filter(d => d.yil == selectedYear) : data;
+                if (filteredData.length === 0) return;
+
+                const labels = filteredData.map(d => d.yil);
+                const gelir = filteredData.map(d => d.gelir);
+                const gider = filteredData.map(d => d.gider);
+                const kar = filteredData.map(d => d.kar);
+
+                const ctx = document.getElementById('gelirGiderKarChart');
+                if (!ctx) return;
+
+                if (gelirGiderKarChart) gelirGiderKarChart.destroy();
+
+                gelirGiderKarChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Gelir ($)', data: gelir, backgroundColor: '#107C10' },
+                            { label: 'Gider ($)', data: gider, backgroundColor: '#D13438' },
+                            { label: 'Kar ($)', data: kar, backgroundColor: '#0078D4' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { max: fixedYAxisMax } }
+                    }
+                });
+
+            } catch (error) { console.error('Hata:', error); }
+        }
+
+        // Grafik 2: Otellerin Yıllara Göre Kar
+        async function loadOtellerKarChart(selectedYear = 'all') {
+            try {
+                const response = await fetch('/api/otellerin-yillara-gore-kar');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                if (!data || data.length === 0) return;
+
+                let filteredData = (selectedYear !== 'all') ? data.filter(d => d.yil == selectedYear) : data;
+
+                // Group by Otel
+                const hotelMap = {};
+                filteredData.forEach(d => {
+                    hotelMap[d.otel_adi] = (hotelMap[d.otel_adi] || 0) + (parseFloat(d.toplam_kar) || parseFloat(d.kar) || 0);
+                });
+
+                const labels = Object.keys(hotelMap);
+                const values = Object.values(hotelMap);
+
+                const ctx = document.getElementById('otellerKarChart');
+                if (!ctx) return;
+
+                if (otellerKarChart) otellerKarChart.destroy();
+
+                otellerKarChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'Kar ($)', data: values, backgroundColor: '#0078D4' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+            } catch (error) { console.error('Hata:', error); }
+        }
+
+        async function loadHotelFinancials(selectedYear) {
+            if (!selectedYear) selectedYear = document.getElementById('yearSelect3').value || '2025';
+
+            try {
+                const response = await fetch(`/api/otellerin-aylik-finansal-verisi?yil=${selectedYear}`);
+                if (!response.ok) throw new Error('Veri çekilemedi');
+
+                const data = await response.json();
+                const grid = document.getElementById('hotelFinancialsGrid');
+                grid.innerHTML = '';
+                multiCharts.forEach(c => c.destroy());
+                multiCharts = [];
+
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; padding: 20px;">Bu yıl için veri bulunamadı.</div>';
+                    return;
+                }
+
+                const hotels = {};
+                data.forEach(item => {
+                    if (!hotels[item.otel_adi]) hotels[item.otel_adi] = [];
+                    hotels[item.otel_adi].push(item);
+                });
+
+                const monthLabels = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+                let hotelIndex = 0;
+                for (const [hotelName, records] of Object.entries(hotels)) {
+                    records.sort((a, b) => parseInt(a.ay) - parseInt(b.ay));
+                    const profitData = new Array(12).fill(0);
+                    const costData = new Array(12).fill(0);
+
+                    records.forEach(r => {
+                        const monthIndex = parseInt(r.ay) - 1;
+                        if (monthIndex >= 0 && monthIndex < 12) {
+                            profitData[monthIndex] = parseFloat(r.kar) || 0;
+                            costData[monthIndex] = parseFloat(r.maliyet) || 0;
+                        }
+                    });
+
+                    const card = document.createElement('div');
+                    card.className = 'chart-box';
+                    card.style.height = '240px';
+                    card.style.padding = '10px 15px';
+                    card.innerHTML = `
+                        <div class="chart-header" style="margin-bottom: 8px; padding-bottom: 5px;">
+                            <div class="chart-title" style="font-size: 14px;">${hotelName}</div>
+                        </div>
+                        <div class="chart-container" style="height: 170px; padding: 0;">
+                            <canvas id="hotelLineChart_${hotelIndex}"></canvas>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+
+                    const ctx = document.getElementById(`hotelLineChart_${hotelIndex}`).getContext('2d');
+                    const newChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: monthLabels,
+                            datasets: [
+                                {
+                                    label: 'Kar ($)',
+                                    data: profitData,
+                                    borderColor: '#0078D4',
+                                    backgroundColor: 'rgba(0, 120, 212, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.3,
+                                    fill: false,
+                                    pointRadius: 2
+                                },
+                                {
+                                    label: 'Maliyet ($)',
+                                    data: costData,
+                                    borderColor: '#D13438',
+                                    backgroundColor: 'rgba(209, 52, 56, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.3,
+                                    fill: false,
+                                    pointRadius: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        font: { size: 9 },
+                                        callback: v => '$' + v.toLocaleString('en-US', { notation: "compact", compactDisplay: "short" })
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        font: { size: 9 },
+                                        maxRotation: 0,
+                                        autoSkip: true,
+                                        maxTicksLimit: 6
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: { boxWidth: 10, padding: 5, font: { size: 10 } }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) label += ': ';
+                                            if (context.parsed.y !== null) {
+                                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    multiCharts.push(newChart);
+                    hotelIndex++;
+                }
+            } catch (error) {
+                console.error('Hotel monthly financials error:', error);
+                document.getElementById('hotelFinancialsGrid').innerHTML = '<div style="color:red; padding:20px;">Grafikler yüklenirken hata oluştu.</div>';
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('yearSelect1')?.addEventListener('change', function () { loadGelirGiderKarChart(this.value); });
+        document.getElementById('yearSelect2')?.addEventListener('change', function () { loadOtellerKarChart(this.value); });
+        document.getElementById('yearSelect3')?.addEventListener('change', function () { loadHotelFinancials(this.value); });
+
+        // Init
+        window.addEventListener('DOMContentLoaded', function () {
+            loadKPI2025(); // Mevcut KPI fonksiyonu
+            loadGelirGiderKarChart();
+            loadOtellerKarChart();
+            loadHotelFinancials(); // Yeni fonksiyon (Varsayılan 2025)
+        });
+    </script>
+</body>
+
+
+
+</html>

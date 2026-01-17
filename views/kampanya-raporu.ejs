@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle || 'Kampanya Analizi' %> - EgeLife Otel</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        /* Kampanya Analizi Sayfası Özel Stilleri */
+        .kampanya-analiz-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .kampanya-filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #323130;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #d2d0ce;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 180px;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #0078D4;
+        }
+
+        .kampanya-table-container {
+            overflow-x: auto;
+            margin-bottom: 24px;
+        }
+
+        .kampanya-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .kampanya-table thead {
+            background: #f3f2f1;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .kampanya-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #323130;
+            border-bottom: 2px solid #d2d0ce;
+            white-space: nowrap;
+        }
+
+        .kampanya-table td {
+            padding: 12px;
+            border-bottom: 1px solid #edebe9;
+            color: #605e5c;
+        }
+
+        .kampanya-table tbody tr:hover {
+            background: #faf9f8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-cok-yuksek {
+            background: #0078D4;
+            color: #fff;
+        }
+
+        .badge-yuksek {
+            background: #107C10;
+            color: #fff;
+        }
+
+        .badge-orta {
+            background: #FFAA44;
+            color: #000;
+        }
+
+        .badge-dusuk {
+            background: #D13438;
+            color: #fff;
+        }
+
+        .artis-pozitif {
+            color: #107C10;
+            font-weight: 600;
+        }
+
+        .artis-negatif {
+            color: #D13438;
+            font-weight: 600;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #d2d0ce;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #323130;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f3f2f1;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-number {
+            padding: 8px 12px;
+            border: 1px solid #d2d0ce;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #323130;
+        }
+
+        .pagination .page-number.active {
+            background: #0078D4;
+            color: #fff;
+            border-color: #0078D4;
+        }
+
+        .pagination .page-number:hover:not(.active) {
+            background: #f3f2f1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #605e5c;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #605e5c;
+        }
+
+        @media (max-width: 768px) {
+            .kampanya-filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-group input,
+            .filter-group select {
+                width: 100%;
+            }
+
+            .kampanya-table {
+                font-size: 12px;
+            }
+
+            .kampanya-table th,
+            .kampanya-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EgeLife Otel</div>
+                <div class="sidebar-subtitle">Karar Destek Sistemi</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/dashboard" class="menu-item">
+                    <span class="menu-text">Anasayfa</span>
+                </a>
+                <a href="/musteri-analizi" class="menu-item">
+                    <span class="menu-text">Müşteri Analizi</span>
+                </a>
+                <a href="/oda-analizi" class="menu-item">
+                    <span class="menu-text">Oda Analizi</span>
+                </a>
+                <a href="/kampanya-raporu" class="menu-item active">
+                    <span class="menu-text">Kampanya Raporu</span>
+                </a>
+                <a href="/memnuniyet-raporu" class="menu-item">
+                    <span class="menu-text">Memnuniyet Raporu</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">EgeLife Otel</div>
+                <div>
+                    <a href="/login" class="logout-btn">Çıkış</a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <h1 class="content-title"><%= pageTitle || 'Kampanya Analizi' %></h1>
+
+                <div class="kampanya-analiz-container">
+                    <!-- Filtreler -->
+                    <div class="kampanya-filters">
+                        <div class="filter-group">
+                            <label for="kampanyaAdiFilter">Kampanya Adı</label>
+                            <input type="text" id="kampanyaAdiFilter" placeholder="Kampanya adı ara...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="etkiSeviyesiFilter">Etki Seviyesi</label>
+                            <select id="etkiSeviyesiFilter">
+                                <option value="all">Tümü</option>
+                                <option value="Yüksek">Yüksek</option>
+                                <option value="Orta">Orta</option>
+                                <option value="Düşük">Düşük</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="otelFilter">Otel</label>
+                            <select id="otelFilter">
+                                <option value="all">Tüm Oteller</option>
+                                <% if (oteller && Array.isArray(oteller) && oteller.length > 0) { %>
+                                    <% for (let i = 0; i < oteller.length; i++) { %>
+                                        <option value="<%= oteller[i].otel_id %>"><%= oteller[i].otel_adi %></option>
+                                    <% } %>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tablo -->
+                    <div class="kampanya-table-container">
+                        <table class="kampanya-table">
+                            <thead>
+                                <tr>
+                                    <th>Kampanya Adı</th>
+                                    <th>Otel Adı</th>
+                                    <th>Tarih Aralığı</th>
+                                    <th>İndirim Oranı (%)</th>
+                                    <th>Önceki Müşteri</th>
+                                    <th>Sonraki Müşteri</th>
+                                    <th>Artış %</th>
+                                    <th>Etki Seviyesi</th>
+                                    <th>Yorum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kampanyaTableBody">
+                                <tr>
+                                    <td colspan="9" class="loading">Yükleniyor...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="paginationContainer"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let currentFilters = {
+            kampanyaAdi: '',
+            etkiSeviyesi: 'all',
+            otelId: 'all'
+        };
+
+        // Badge rengi belirleme
+        function getBadgeClass(etkiSeviyesi) {
+            if (!etkiSeviyesi) return '';
+            const seviye = etkiSeviyesi.toLowerCase();
+            if (seviye.includes('çok yüksek') || seviye.includes('cok yuksek')) return 'badge-cok-yuksek';
+            if (seviye.includes('yüksek') || seviye.includes('yuksek')) return 'badge-yuksek';
+            if (seviye.includes('orta')) return 'badge-orta';
+            if (seviye.includes('düşük') || seviye.includes('dusuk')) return 'badge-dusuk';
+            return 'badge-orta';
+        }
+
+        // Artış yüzdesi formatı
+        function formatArtisYuzde(value) {
+            const num = parseFloat(value) || 0;
+            const className = num > 0 ? 'artis-pozitif' : num < 0 ? 'artis-negatif' : '';
+            const sign = num > 0 ? '+' : '';
+            return `<span class="${className}">${sign}${num.toFixed(2)}%</span>`;
+        }
+
+        // Tablo verilerini yükle
+        async function loadKampanyaTable(page = 1) {
+            currentPage = page;
+            const tbody = document.getElementById('kampanyaTableBody');
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">Yükleniyor...</td></tr>';
+
+            try {
+                // Debug: Filtreleri konsola yazdır
+                console.log('Frontend Filtreler:', {
+                    kampanyaAdi: currentFilters.kampanyaAdi,
+                    etkiSeviyesi: currentFilters.etkiSeviyesi,
+                    otelId: currentFilters.otelId,
+                    page: page
+                });
+
+                const params = new URLSearchParams({
+                    kampanya_adi: currentFilters.kampanyaAdi,
+                    etki_seviyesi: currentFilters.etkiSeviyesi,
+                    otel_id: currentFilters.otelId,
+                    page: page,
+                    limit: 8
+                });
+
+                console.log('API İsteği:', `/api/kampanya/analiz?${params.toString()}`);
+                const response = await fetch(`/api/kampanya/analiz?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.data || result.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="no-data">Kampanya verisi bulunamadı.</td></tr>';
+                    document.getElementById('paginationContainer').innerHTML = '';
+                    return;
+                }
+
+                // Tablo satırlarını oluştur
+                tbody.innerHTML = result.data.map(row => `
+                    <tr>
+                        <td>${row.kampanya_adi || '-'}</td>
+                        <td>${row.otel_adi || '-'}</td>
+                        <td>${row.donem || '-'}</td>
+                        <td>${row.indirim_orani || 0}%</td>
+                        <td>${(row.onceki_musteri_sayisi || 0).toLocaleString('tr-TR')}</td>
+                        <td>${(row.sonraki_musteri_sayisi || 0).toLocaleString('tr-TR')}</td>
+                        <td>${formatArtisYuzde(row.artis_yuzde)}</td>
+                        <td><span class="badge ${getBadgeClass(row.etki_seviyesi)}">${row.etki_seviyesi || '-'}</span></td>
+                        <td>${row.yorum || '-'}</td>
+                    </tr>
+                `).join('');
+
+                // Pagination oluştur
+                renderPagination(result.page, result.totalPages);
+
+            } catch (error) {
+                console.error('Kampanya tablosu yükleme hatası:', error);
+                tbody.innerHTML = '<tr><td colspan="9" class="no-data">Veri yüklenirken hata oluştu.</td></tr>';
+            }
+        }
+
+        // Pagination render
+        function renderPagination(currentPageNum, totalPages) {
+            const container = document.getElementById('paginationContainer');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Önceki butonu
+            html += `<button onclick="loadKampanyaTable(${currentPageNum - 1})" ${currentPageNum === 1 ? 'disabled' : ''}>Önceki</button>`;
+
+            // Sayfa numaraları
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPageNum - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<span class="page-number" onclick="loadKampanyaTable(1)">1</span>`;
+                if (startPage > 2) {
+                    html += `<span>...</span>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<span class="page-number ${i === currentPageNum ? 'active' : ''}" onclick="loadKampanyaTable(${i})">${i}</span>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<span>...</span>`;
+                }
+                html += `<span class="page-number" onclick="loadKampanyaTable(${totalPages})">${totalPages}</span>`;
+            }
+
+            // Sonraki butonu
+            html += `<button onclick="loadKampanyaTable(${currentPageNum + 1})" ${currentPageNum === totalPages ? 'disabled' : ''}>Sonraki</button>`;
+
+            container.innerHTML = html;
+        }
+
+        // Filtre değişikliklerini dinle
+        document.getElementById('kampanyaAdiFilter').addEventListener('input', function() {
+            currentFilters.kampanyaAdi = this.value;
+            currentPage = 1;
+            loadKampanyaTable(1);
+        });
+
+        document.getElementById('etkiSeviyesiFilter').addEventListener('change', function() {
+            currentFilters.etkiSeviyesi = this.value;
+            currentPage = 1;
+            loadKampanyaTable(1);
+        });
+
+        document.getElementById('otelFilter').addEventListener('change', function() {
+            currentFilters.otelId = this.value;
+            currentPage = 1;
+            loadKampanyaTable(1);
+        });
+
+        // Sayfa yüklendiğinde tabloyu otomatik yükle
+        window.addEventListener('DOMContentLoaded', function() {
+            loadKampanyaTable(1);
+        });
+    </script>
+</body>
+</html>

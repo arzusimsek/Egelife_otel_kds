@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= pageTitle || 'Oda Analizleri' %> - EgeLife Otel
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .chart-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 12px;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .chart-filters select {
+            padding: 8px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #323130;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .chart-card-compact {
+            padding: 12px;
+        }
+
+        .chart-wrapper-bar {
+            height: 275px;
+            margin: 0 auto;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* KPI Kartları Stilleri */
+        .kpi-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 180px;
+            min-width: 160px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .kpi-card-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+        }
+
+        .kpi-card .kpi-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #323130;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .kpi-card .kpi-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .kpi-icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EgeLife Otel</div>
+                <div class="sidebar-subtitle">Karar Destek Sistemi</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/dashboard" class="menu-item">
+                    <span class="menu-text">Anasayfa</span>
+                </a>
+                <a href="/musteri-analizi" class="menu-item">
+                    <span class="menu-text">Müşteri Analizi</span>
+                </a>
+                <a href="/oda-analizi" class="menu-item active">
+                    <span class="menu-text">Oda Analizi</span>
+                </a>
+                <a href="/kampanya-raporu" class="menu-item">
+                    <span class="menu-text">Kampanya Raporu</span>
+                </a>
+                <a href="/memnuniyet-raporu" class="menu-item">
+                    <span class="menu-text">Memnuniyet Raporu</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">EgeLife Otel</div>
+                <div>
+                    <a href="/login" class="logout-btn">Çıkış</a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <h1 class="content-title">
+                    <%= pageTitle || 'Oda Analizleri' %>
+                </h1>
+
+                <!-- KPI Kartları: Otel Oda Sayıları -->
+                <% if (oteller && oteller.length> 0) { %>
+                    <div class="kpi-cards">
+                        <% const colors=['#0078D4', '#107C10' , '#FF8C00' , '#8764B8' , '#00B7C3' , '#D13438' ];
+                            oteller.forEach(function(otel, index) { const colorIndex=index % colors.length; const
+                            cardColor=colors[colorIndex]; %>
+                            <div class="kpi-card">
+                                <!-- Renkli üst şerit -->
+                                <div class="kpi-card-strip" data-color="<%= cardColor %>"
+                                    style="position: absolute; top: 0; left: 0; right: 0; height: 5px;"></div>
+
+                                <!-- İkon ve İçerik -->
+                                <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 6px;">
+                                    <div class="kpi-icon" style="color: #605e5c; margin-top: 2px;">🏨</div>
+                                    <div style="flex: 1;">
+                                        <div class="kpi-title">
+                                            <%= otel.otel_adi || '-' %>
+                                        </div>
+                                        <div class="kpi-value">Mevcut Oda: <%= (otel.toplam_oda_sayisi ||
+                                                otel.oda_sayisi || 0) %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+
+                        <!-- Grafikler: Yan Yana -->
+                        <div class="chart-row">
+                            <!-- Sol: Yıllık Oda Tipi Popülerliği -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <div class="chart-title">Yıllık Oda Tipi Kâr Marjı (%)</div>
+                                    <div class="chart-filters">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 13px; color: #666; font-weight: 500;">Yıl:</span>
+                                            <select id="treemapYilSecimi">
+                                                <% if (yillar && yillar.length> 0) { %>
+                                                    <% yillar.forEach(yil=> { %>
+                                                        <option value="<%= yil.yil || yil %>" <%=(yil.yil ||
+                                                            yil)==defaultYil ? 'selected' : '' %>><%= yil.yil || yil %>
+                                                        </option>
+                                                        <% }); %>
+                                                            <% } else { %>
+                                                                <option value="2023">2023</option>
+                                                                <option value="2024">2024</option>
+                                                                <option value="2025" selected>2025</option>
+                                                                <% } %>
+                                            </select>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 13px; color: #666; font-weight: 500;">Otel:</span>
+                                            <select id="treemapOtelSecimi">
+                                                <% if (oteller && oteller.length> 0) { %>
+                                                    <% oteller.forEach(otel=> { %>
+                                                        <option value="<%= otel.otel_id %>" <%=defaultOtel &&
+                                                            otel.otel_id==defaultOtel.otel_id ? 'selected' : '' %>><%=
+                                                                otel.otel_adi %>
+                                                        </option>
+                                                        <% }); %>
+                                                            <% } %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="treemapOdaTipi"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Sağ: Aylık Oda Tipi Dağılımı -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <div class="chart-title">Aylık Oda Tipi Dağılımı</div>
+                                    <div class="chart-filters">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 13px; color: #666; font-weight: 500;">Yıl:</span>
+                                            <select id="stackedYilSecimi">
+                                                <% if (yillar && yillar.length> 0) { %>
+                                                    <% yillar.forEach(yil=> { %>
+                                                        <option value="<%= yil.yil || yil %>" <%=(yil.yil ||
+                                                            yil)==defaultYil ? 'selected' : '' %>><%= yil.yil || yil %>
+                                                        </option>
+                                                        <% }); %>
+                                                            <% } else { %>
+                                                                <option value="2023">2023</option>
+                                                                <option value="2024">2024</option>
+                                                                <option value="2025" selected>2025</option>
+                                                                <% } %>
+                                            </select>
+                                            </select>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 13px; color: #666; font-weight: 500;">Otel:</span>
+                                            <select id="stackedOtelSecimi">
+                                                <% if (oteller && oteller.length> 0) { %>
+                                                    <% oteller.forEach(otel=> { %>
+                                                        <option value="<%= otel.otel_id %>" <%=defaultOtel &&
+                                                            otel.otel_id==defaultOtel.otel_id ? 'selected' : '' %>><%=
+                                                                otel.otel_adi %>
+                                                        </option>
+                                                        <% }); %>
+                                                            <% } %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="stackedOdaAylik"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+
+            </div>
+        </main>
+    </div>
+
+    <script id="oda-tipi-data" type="application/json">
+        <%- JSON.stringify(odaTipleri || []) %>
+    </script>
+    <script>
+        // KPI kartlarının renkli şeritlerini ayarla
+        document.addEventListener('DOMContentLoaded', function () {
+            const strips = document.querySelectorAll('.kpi-card-strip');
+            strips.forEach(function (strip) {
+                const color = strip.getAttribute('data-color');
+                if (color) {
+                    strip.style.backgroundColor = color;
+                }
+            });
+        });
+
+        // Oda tipi isimlerini JavaScript'e aktar
+        const odaTipiData = JSON.parse(document.getElementById('oda-tipi-data').textContent);
+        const odaTipiMap = {};
+        odaTipiData.forEach(tip => {
+            odaTipiMap[tip.oda_tipi_id] = tip.oda_tipi_adi;
+        });
+
+        let treemapChart = null;
+        let stackedChart = null;
+
+        // Bar Chart: Yıllık Oda Tipi Popülerliği
+        async function loadTreemap(yil, otelId) {
+            if (!yil || !otelId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/oda/treemap/${yil}/${otelId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const result = await response.json();
+                const canvas = document.getElementById('treemapOdaTipi');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                if (treemapChart) {
+                    treemapChart.destroy();
+                }
+
+                // Verileri tekilleştir ve formatla (her oda tipi için sadece en güncel/tek veri)
+                const uniqueData = {};
+                result.data.forEach(item => {
+                    const name = item.oda_tipi_adi || '-';
+                    // Eğer mükerrer veri gelirse ilkini al (SQL'de düzeltildi ama JS güvenliği için)
+                    if (!uniqueData[name]) {
+                        uniqueData[name] = parseFloat(item.toplam) || 0;
+                    }
+                });
+
+                const labels = Object.keys(uniqueData);
+                const values = Object.values(uniqueData);
+
+                // Chart initialization
+                treemapChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Kar Marjı (%)',
+                            data: values,
+                            backgroundColor: 'rgba(0, 120, 212, 0.8)',
+                            borderColor: '#0078D4',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.8, // Daha kalın barlar
+                            categoryPercentage: 0.9
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false // Daha sade görünüm için lejantı gizle
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        return 'Kâr Marjı: %' + ctx.parsed.y.toFixed(1);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    maxRotation: 45, // Çapraz etiketler ile çakışma engellendi
+                                    minRotation: 45,
+                                    autoSkip: false,
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function (value) {
+                                        return '%' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Yıllık oda tipi popülerliği yükleme hatası:', error);
+            }
+        }
+
+        // Stacked Bar: Aylık Oda Tipi Dağılımı
+        async function loadStackedBar(yil, otelId) {
+            try {
+                const response = await fetch(`/api/oda/aylik/${yil}/${otelId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const result = await response.json();
+                const canvas = document.getElementById('stackedOdaAylik');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                if (stackedChart) {
+                    stackedChart.destroy();
+                }
+
+                if (!result.datasets || result.datasets.length === 0) {
+                    console.warn('Stacked bar için veri bulunamadı');
+                    return;
+                }
+
+                const colors = ['#0078D4', '#107C10', '#FF8C00', '#8764B8', '#00B7C3', '#D13438', '#E3008C'];
+
+                const datasets = result.datasets.map((ds, index) => ({
+                    label: ds.oda_tipi_adi || odaTipiMap[ds.oda_tipi_id] || `Oda Tipi ${ds.oda_tipi_id}`,
+                    data: ds.data || [],
+                    backgroundColor: colors[index % colors.length],
+                    borderColor: colors[index % colors.length],
+                    borderWidth: 1
+                }));
+
+                stackedChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: result.aylar,
+                        datasets: datasets
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Stacked bar yükleme hatası:', error);
+            }
+        }
+
+
+
+        // Event Listeners
+        document.getElementById('treemapYilSecimi')?.addEventListener('change', function () {
+            const otelId = document.getElementById('treemapOtelSecimi')?.value;
+            if (otelId) {
+                loadTreemap(this.value, otelId);
+            }
+        });
+
+        document.getElementById('treemapOtelSecimi')?.addEventListener('change', function () {
+            const yil = document.getElementById('treemapYilSecimi')?.value;
+            if (yil) {
+                loadTreemap(yil, this.value);
+            }
+        });
+
+        document.getElementById('stackedYilSecimi')?.addEventListener('change', function () {
+            const otelId = document.getElementById('stackedOtelSecimi')?.value;
+            if (otelId) loadStackedBar(this.value, otelId);
+        });
+
+        document.getElementById('stackedOtelSecimi')?.addEventListener('change', function () {
+            const yil = document.getElementById('stackedYilSecimi')?.value;
+            if (yil) loadStackedBar(yil, this.value);
+        });
+
+        // Sayfa yüklendiğinde grafikleri yükle
+        window.addEventListener('DOMContentLoaded', function () {
+            const treemapYil = document.getElementById('treemapYilSecimi')?.value || '2025';
+            const treemapOtel = document.getElementById('treemapOtelSecimi')?.value;
+            if (treemapOtel) {
+                loadTreemap(treemapYil, treemapOtel);
+            }
+
+            const stackedYil = document.getElementById('stackedYilSecimi')?.value || '2025';
+            const stackedOtel = document.getElementById('stackedOtelSecimi')?.value;
+            if (stackedOtel) loadStackedBar(stackedYil, stackedOtel);
+        });
+    </script>
+</body>
+
+</html>

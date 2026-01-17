@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İstatistikler - EgeLife Otel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-table th {
+            background: #4a90e2;
+            color: white;
+            font-weight: 600;
+        }
+
+        .stats-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .nav-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 10px 20px;
+            background: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aylık İstatistikler</h1>
+
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Ay</th>
+                    <th>Toplam Rezervasyon</th>
+                    <th>Gelir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each istatistik}}
+                    <tr>
+                        <td>{{.ay}}</td>
+                        <td>{{.toplam_rezervasyon}}</td>
+                        <td>{{.gelir}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <div class="nav-links">
+            <a href="/dashboard">Ana Sayfa</a>
+            <a href="/oteller">Oteller</a>
+            <a href="/login">Çıkış</a>
+        </div>
+    </div>
+</body>
+</html>
+

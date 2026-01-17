@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= pageTitle || 'Memnuniyet Raporu' %> - EgeLife Otel
+    </title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        /* Memnuniyet KPI Kartları */
+        .memnuniyet-kpi-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .memnuniyet-kpi-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 12px;
+        }
+
+        .rating-cards {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+        }
+
+        .memnuniyet-kpi-card {
+            background: #ffffff;
+            border: 1px solid #edebe9;
+            border-radius: 6px;
+            padding: 8px;
+            max-width: 160px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .memnuniyet-kpi-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        .memnuniyet-kpi-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 6px;
+        }
+
+        .memnuniyet-kpi-card-puan {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0078D4;
+            margin-bottom: 6px;
+        }
+
+        .memnuniyet-kpi-card-stars {
+            font-size: 12px;
+            line-height: 1;
+            color: #FFB900;
+        }
+
+        .memnuniyet-kpi-card-stars .star-full {
+            color: #FFB900;
+        }
+
+        .memnuniyet-kpi-card-stars .star-half {
+            color: #FFB900;
+        }
+
+        .memnuniyet-kpi-card-stars .star-empty {
+            color: #d2d0ce;
+        }
+
+        @media (max-width: 768px) {
+            .rating-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .memnuniyet-kpi-card {
+                max-width: 100%;
+            }
+        }
+
+        /* Yorum Trend Line Chart Container */
+        .yorum-trend-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .yorum-trend-wrapper {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+
+        .yorum-trend-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .yorum-trend-no-data {
+            text-align: center;
+            padding: 20px;
+            color: #605E5C;
+            font-size: 13px;
+        }
+    </style>
+    <style>
+        /* Grid Düzeni */
+        .analysis-grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .analysis-grid-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Taktiksel Karar Destek Kartları */
+        .decision-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e1dfdd;
+            border-left: 5px solid #0078d4;
+            height: 100%;
+        }
+
+        .decision-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f3f2f1;
+            padding-bottom: 12px;
+        }
+
+        .decision-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #201f1e;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .decision-icon {
+            font-size: 24px;
+        }
+
+        .decision-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .radar-chart-box {
+            height: 300px;
+            position: relative;
+        }
+
+        .insights-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            align-content: start;
+        }
+
+        .insight-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #ccc;
+            padding: 15px;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .insight-card.warning {
+            border-color: #d13438;
+            background-color: #fde7e9;
+        }
+
+        .insight-card.success {
+            border-color: #107c10;
+            background-color: #dff6dd;
+        }
+
+        .insight-card.info {
+            border-color: #0078d4;
+            background-color: #eff6fc;
+        }
+
+        .insight-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #323130;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .insight-body {
+            font-size: 13px;
+            color: #605e5c;
+            line-height: 1.4;
+        }
+
+        .insight-action {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            font-size: 12px;
+            color: #201f1e;
+        }
+
+        .action-label {
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 0.5px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EgeLife Otel</div>
+                <div class="sidebar-subtitle">Karar Destek Sistemi</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/dashboard" class="menu-item">
+                    <span class="menu-text">Anasayfa</span>
+                </a>
+                <a href="/musteri-analizi" class="menu-item">
+                    <span class="menu-text">Müşteri Analizi</span>
+                </a>
+                <a href="/oda-analizi" class="menu-item">
+                    <span class="menu-text">Oda Analizi</span>
+                </a>
+                <a href="/kampanya-raporu" class="menu-item">
+                    <span class="menu-text">Kampanya Raporu</span>
+                </a>
+                <a href="/memnuniyet-raporu" class="menu-item active">
+                    <span class="menu-text">Memnuniyet Raporu</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">EgeLife Otel</div>
+                <div>
+                    <a href="/login" class="logout-btn">Çıkış</a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <h1 class="content-title" style="font-size: 18px;">
+                    <%= pageTitle || 'Müşteri Memnuniyeti' %>
+                </h1>
+
+                <!-- Otellere Göre Ortalama Memnuniyet Puanı -->
+                <div class="memnuniyet-kpi-container">
+                    <h2 class="memnuniyet-kpi-title">Otellere Göre Ortalama Memnuniyet Puanı</h2>
+                    <% if (otelMemnuniyetleri && otelMemnuniyetleri.length> 0) { %>
+                        <div class="rating-cards">
+                            <% otelMemnuniyetleri.forEach(function(otel) { const puan=parseFloat(otel.ortalama_puan) ||
+                                0; const fullStars=Math.floor(puan); const hasHalfStar=(puan % 1)>= 0.5;
+                                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                                %>
+                                <div class="memnuniyet-kpi-card">
+                                    <div class="memnuniyet-kpi-card-title">
+                                        <%= otel.otel_adi || '-' %>
+                                    </div>
+                                    <div class="memnuniyet-kpi-card-puan">
+                                        <%= puan.toFixed(1) %>
+                                    </div>
+                                    <div class="memnuniyet-kpi-card-stars">
+                                        <% for (let i=0; i < fullStars; i++) { %>
+                                            <span class="star-full">⭐</span>
+                                            <% } %>
+                                                <% if (hasHalfStar) { %>
+                                                    <span class="star-half">✨</span>
+                                                    <% } %>
+                                                        <% for (let i=0; i < emptyStars; i++) { %>
+                                                            <span class="star-empty">☆</span>
+                                                            <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } else { %>
+                            <p style="color: #605E5C; text-align: center; padding: 40px;">Memnuniyet verisi bulunamadı.
+                            </p>
+                            <% } %>
+                </div>
+
+                <!-- YENİ: Yan Yana Grid Düzeni -->
+                <div class="analysis-grid-row">
+                    <!-- Sol: Taktiksel Karar Destek Bölümü -->
+                    <div class="decision-section">
+                        <div class="decision-header">
+                            <span class="decision-icon">🧠</span>
+                            <h2>Taktiksel Karar Destek Analizi</h2>
+                            <div style="margin-left: auto; display: flex; gap: 10px;">
+                                <select id="decisionOtelSelect"
+                                    style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; max-width: 120px;">
+                                    <% if (oteller && oteller.length> 0) { %>
+                                        <% oteller.forEach(function(otel) { %>
+                                            <option value="<%= otel.otel_id %>">
+                                                <%= otel.otel_adi %>
+                                            </option>
+                                            <% }); %>
+                                                <% } %>
+                                </select>
+                                <select id="decisionYilSelect"
+                                    style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="2025" selected>2025</option>
+                                    <option value="2024">2024</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="decision-grid">
+                            <!-- Üst: Bar Grafik (Detaylı Puanlar) -->
+                            <div>
+                                <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #666; text-align: center;">Hizmet
+                                    Kalitesi Detay Analizi</h3>
+                                <div class="radar-chart-box">
+                                    <canvas id="decisionRadarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Alt: Akıllı Öneriler -->
+                            <div>
+
+                                <div id="decisionInsights" class="insights-box">
+                                    <div style="text-align: center; color: #666; padding: 20px;">Analiz yükleniyor...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ: Yorum Trend Grafiği -->
+                    <div class="yorum-trend-container">
+                        <h2 class="yorum-trend-title">Yorum Trend Grafiği</h2>
+                        <div class="yorum-trend-filters">
+                            <select id="yorumTrendOtelSecimi">
+                                <option value="">Otel Seçin</option>
+                                <% if (oteller && oteller.length> 0) { %>
+                                    <% for (let i=0; i < oteller.length; i++) { %>
+                                        <option value="<%= oteller[i].otel_id %>" <%=(i===0) ? 'selected' : '' %>><%=
+                                                oteller[i].otel_adi %>
+                                        </option>
+                                        <% } %>
+                                            <% } %>
+                            </select>
+                            <select id="yorumTrendYilSecimi">
+                                <option value="">Yıl Seçin</option>
+                                <% if (yillar && yillar.length> 0) { %>
+                                    <% for (let i=0; i < yillar.length; i++) { %>
+                                        <option value="<%= yillar[i].yil %>" <%=(yillar[i].yil==2025) ? 'selected' : ''
+                                            %>>
+                                            <%= yillar[i].yil %>
+                                        </option>
+                                        <% } %>
+                                            <% } %>
+                            </select>
+                        </div>
+                        <div class="yorum-trend-wrapper">
+                            <canvas id="yorumTrendChart"></canvas>
+                        </div>
+                        <div id="yorumTrendNoData" class="yorum-trend-no-data" style="display: none;">
+                            Seçilen yıl için yorum verisi bulunamadı
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Ay isimleri
+        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        let yorumTrendChart = null;
+        let decisionRadarChart = null; // Yeni radar chart değişkeni
+
+        // Taktiksel Karar Destek Yükleme Fonksiyonu
+        function loadDecisionSupport(otelId, yil) {
+            const container = document.getElementById('decisionInsights');
+            if (!container) return;
+
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Veriler analiz ediliyor...</div>';
+
+            fetch(`/api/memnuniyet/detayli-analiz?otel_id=${otelId}&yil=${yil}`)
+                .then(res => res.json())
+                .then(data => {
+                    const otel = data.otel;
+                    const grup = data.grup;
+
+                    // 1. Radar Grafiği Çiz
+                    const ctx = document.getElementById('decisionRadarChart');
+                    if (decisionRadarChart) decisionRadarChart.destroy();
+
+                    decisionRadarChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Genel', 'Temizlik', 'Hizmet', 'Konum', 'Fiyat/Fayda'],
+                            datasets: [{
+                                label: 'Seçilen Otel',
+                                data: [otel.genel_puan, otel.temizlik, otel.hizmet, otel.konum, otel.fiyat_fayda],
+                                backgroundColor: '#0078D4',
+                                borderColor: '#0078D4',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.5
+                            }, {
+                                label: 'Grup Ortalaması',
+                                data: [grup.genel_puan, grup.temizlik, grup.hizmet, grup.konum, grup.fiyat_fayda],
+                                backgroundColor: '#C8C6C4',
+                                borderColor: '#C8C6C4',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 5,
+                                    grid: {
+                                        color: '#f3f2f1'
+                                    },
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    align: 'end',
+                                    labels: {
+                                        usePointStyle: true,
+                                        boxWidth: 8
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 2. Akıllı Insight Kartları Oluştur
+                    let insightsHtml = '';
+
+
+
+                    // Kural 2: Fiyat Fırsatı
+                    if (otel.fiyat_fayda < 3.8 && otel.genel_puan > 4.2) {
+                        insightsHtml += `
+                            <div class="insight-card info">
+                                <div class="insight-title">💡 Fiyatlandırma Stratejisi</div>
+                                <div class="insight-body">Hizmet kaliteniz yüksek (${parseFloat(otel.genel_puan).toFixed(1)}) ancak fiyat/performans algısı düşük. Müşteriler hizmeti beğeniyor ama pahalı buluyor.</div>
+                                <div class="insight-action">
+                                    <span class="action-label">ÖNERİLEN AKSİYON:</span><br>
+                                    Erken rezervasyon kampanyaları veya sadakat indirimleri ile fiyat algısını yönetin.
+                                </div>
+                            </div>
+                        `;
+                    } else if (otel.fiyat_fayda > 4.5 && otel.doluluk > 0.8) { // Doluluk verisi simüle ediliyor
+                        insightsHtml += `
+                            <div class="insight-card success">
+                                <div class="insight-title">💰 Gelir Artırma Fırsatı</div>
+                                <div class="insight-body">Fiyat/Fayda algısı çok yüksek (${parseFloat(otel.fiyat_fayda).toFixed(1)}) ve talep güçlü.</div>
+                                <div class="insight-action">
+                                    <span class="action-label">ÖNERİLEN AKSİYON:</span><br>
+                                    Oda fiyatlarında %5-10 artışa giderek karlılığı optimize edebilirsiniz.
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Kural 3: Hizmet Kalitesi
+                    if (otel.hizmet < otel.konum - 0.5) {
+                        insightsHtml += `
+                            <div class="insight-card warning">
+                                <div class="insight-title">👤 Personel / Hizmet Açığı</div>
+                                <div class="insight-body">Otel konumu avantajlı (${parseFloat(otel.konum).toFixed(1)}) ancak hizmet kalitesi (${parseFloat(otel.hizmet).toFixed(1)}) bu avantajı gölgeliyor.</div>
+                                <div class="insight-action">
+                                    <span class="action-label">ÖNERİLEN AKSİYON:</span><br>
+                                    Personel memnuniyetini ölçün ve misafir ilişkileri departmanını güçlendirin.
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Varsayılan Başarılı Durum
+
+
+                    container.innerHTML = insightsHtml;
+
+                })
+                .catch(err => {
+                    console.error('Karar destek verisi hatası:', err);
+                    container.innerHTML = 'Veri yüklenirken hata oluştu.';
+                });
+        }
+
+        // Yorum trend verilerini yükle (dual-axis chart: bar + line)
+        function loadYorumTrendData(otelId, yil) {
+            if (!otelId || !yil) {
+                if (yorumTrendChart) {
+                    yorumTrendChart.destroy();
+                    yorumTrendChart = null;
+                }
+                document.getElementById('yorumTrendNoData').style.display = 'block';
+                return;
+            }
+
+            console.log('Yorum trend verisi yükleniyor:', { otelId, yil });
+            fetch(`/api/memnuniyet/trend?otel_id=${otelId}&yil=${yil}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.message || 'HTTP error! status: ' + response.status);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Yorum trend verisi alındı:', data);
+                    console.log('Veri uzunluğu:', data ? data.length : 0);
+                    document.getElementById('yorumTrendNoData').style.display = 'none';
+
+                    if (!data || data.length === 0) {
+                        if (yorumTrendChart) {
+                            yorumTrendChart.destroy();
+                            yorumTrendChart = null;
+                        }
+                        document.getElementById('yorumTrendNoData').style.display = 'block';
+                        return;
+                    }
+
+                    // Backend'den gelen veri zaten ay string formatında (Ocak, Şubat, vb.)
+                    // Tüm ayları oluştur (eksik aylar için 0 değer)
+                    const allMonths = [];
+                    for (let i = 0; i < 12; i++) {
+                        const monthName = ayIsimleri[i];
+                        const monthData = data.find(d => d.ay === monthName);
+                        allMonths.push({
+                            ay: monthName,
+                            yorum_sayisi: monthData ? parseInt(monthData.yorum_sayisi) || 0 : 0,
+                            ortalama_puan: monthData ? parseFloat(monthData.ortalama_puan) || 0 : 0
+                        });
+                    }
+
+                    const labels = allMonths.map(item => item.ay);
+                    const yorumSayilari = allMonths.map(item => item.yorum_sayisi);
+                    const ortalamaPuani = allMonths.map(item => item.ortalama_puan);
+
+                    // Mevcut grafiği yok et
+                    const ctx = document.getElementById('yorumTrendChart');
+                    if (yorumTrendChart) {
+                        yorumTrendChart.destroy();
+                    }
+
+                    // Dual-axis chart oluştur (Bar + Line)
+                    yorumTrendChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Yorum Sayısı',
+                                    data: yorumSayilari,
+                                    type: 'bar',
+                                    backgroundColor: 'rgba(78, 121, 167, 0.6)',
+                                    borderColor: 'rgba(78, 121, 167, 0.8)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Ortalama Puan',
+                                    data: ortalamaPuani,
+                                    type: 'line',
+                                    borderColor: '#0078D4',
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 4,
+                                    pointBackgroundColor: '#0078D4',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 1,
+                                    tension: 0.3,
+                                    fill: false,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            if (context.datasetIndex === 0) {
+                                                return `Yorum Sayısı: ${context.parsed.y}`;
+                                            } else {
+                                                return `Ortalama Puan: ${context.parsed.y.toFixed(2)}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    grid: {
+                                        display: true,
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Yorum Sayısı'
+                                    },
+                                    grid: {
+                                        display: true,
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    max: 5,
+                                    title: {
+                                        display: true,
+                                        text: 'Ortalama Puan'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Yorum trend verisi yüklenirken hata:', error);
+                    if (yorumTrendChart) {
+                        yorumTrendChart.destroy();
+                        yorumTrendChart = null;
+                    }
+                    document.getElementById('yorumTrendNoData').style.display = 'block';
+                    document.getElementById('yorumTrendNoData').textContent = 'Seçilen yıl için yorum verisi bulunamadı';
+                });
+        }
+
+        // Dropdown değişikliklerini dinle ve varsayılan değerlerle yükle
+        document.addEventListener('DOMContentLoaded', function () {
+            const otelSelect = document.getElementById('yorumTrendOtelSecimi');
+            const yilSelect = document.getElementById('yorumTrendYilSecimi');
+
+            if (otelSelect && yilSelect) {
+                // Varsayılan değerleri ayarla: otel_id = 1, yil = 2025
+                let defaultOtelId = '1';
+                let defaultYil = '2025';
+
+                // İlk oteli seç (eğer varsa)
+                if (otelSelect.options.length > 1) {
+                    const firstOtelOption = otelSelect.options[1]; // İlk option "Otel Seçin" olduğu için 1'den başla
+                    if (firstOtelOption && firstOtelOption.value) {
+                        defaultOtelId = firstOtelOption.value;
+                        otelSelect.value = defaultOtelId;
+                    }
+                }
+
+                // 2025'ı seç
+                const option2025 = Array.from(yilSelect.options).find(opt => opt.value === '2025');
+                if (option2025) {
+                    yilSelect.value = '2025';
+                    defaultYil = '2025';
+                } else if (yilSelect.options.length > 1) {
+                    // 2025 yoksa ilk yılı seç
+                    yilSelect.value = yilSelect.options[1].value;
+                    defaultYil = yilSelect.options[1].value;
+                }
+
+                // Grafiği otomatik yükle
+                if (defaultOtelId && defaultYil) {
+                    setTimeout(() => {
+                        loadYorumTrendData(defaultOtelId, defaultYil);
+                    }, 100);
+                }
+
+                otelSelect.addEventListener('change', function () {
+                    if (this.value && yilSelect.value) {
+                        loadYorumTrendData(this.value, yilSelect.value);
+                    }
+                });
+
+                yilSelect.addEventListener('change', function () {
+                    if (otelSelect.value && this.value) {
+                        loadYorumTrendData(otelSelect.value, this.value);
+                    }
+                });
+                // Karar Destek Event Listeners
+                const decOtel = document.getElementById('decisionOtelSelect');
+                const decYil = document.getElementById('decisionYilSelect');
+
+                if (decOtel && decYil) {
+                    // Sayfa yüklendiğinde çalıştır (hafif gecikmeli)
+                    setTimeout(() => {
+                        loadDecisionSupport(decOtel.value, decYil.value);
+                    }, 500);
+
+                    decOtel.addEventListener('change', () => loadDecisionSupport(decOtel.value, decYil.value));
+                    decYil.addEventListener('change', () => loadDecisionSupport(decOtel.value, decYil.value));
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

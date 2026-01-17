@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müşteri Analizi - EgeLife Otel</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .campaign-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .campaign-item {
+            background: #fff;
+            border: 1px solid #edebe9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .campaign-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .campaign-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 12px;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            border-bottom: 1px solid #f3f2f1;
+            padding-bottom: 5px;
+        }
+
+        .campaign-mini-wrapper {
+            height: 250px;
+            position: relative;
+        }
+
+        #radarChartLoading {
+            font-weight: 500;
+            color: #0078d4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <style>
+        /* Pie Chart'ları Yan Yana Hizalama */
+        .pie-row {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .pie-row .chart-card {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .pie-row {
+                flex-direction: column;
+            }
+        }
+
+        /* Chart Card Stilleri */
+        .chart-card {
+            padding: 8px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 8px;
+        }
+
+        /* Üst Grafikler Container - Flex Row */
+        .container-ust-kartlar {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 32px;
+            align-items: stretch;
+        }
+
+        .container-ust-kartlar .chart-card {
+            flex: 1;
+            width: 0;
+            /* Let flex handle it */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Pie Chart'lar için Flex Yapısı - İki Kolon */
+        .chart-row {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            width: 100%;
+            align-items: stretch;
+            margin-bottom: 32px;
+            justify-content: center;
+        }
+
+        .chart-row .chart-card {
+            flex: 1;
+            width: 0;
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+        }
+
+        .chart-large .chart-wrapper {
+            height: 340px;
+        }
+
+        .chart-medium .chart-wrapper {
+            height: 150px;
+            flex-shrink: 0;
+        }
+
+        .chart-wrapper {
+            position: relative;
+        }
+
+        .container-ust-kartlar .chart-card .chart-wrapper {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .chart-row .chart-card .chart-wrapper {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Pie Chart Canvas Boyut Sınırlaması */
+        #oldPieChart,
+        #newPieChart {
+            max-width: 100% !important;
+            max-height: 400px !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Pie chart wrapper'larındaki canvas'lar için özel stil */
+        .chart-row .chart-card .chart-wrapper canvas {
+            max-width: 350px !important;
+            max-height: 350px !important;
+        }
+
+        /* Pie Chart Container için özel stil */
+        #oldChartContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 350px;
+            max-height: 350px;
+            margin: 0 auto;
+        }
+
+        /* İkinci pie chart wrapper için */
+        .chart-row .chart-card .chart-wrapper:has(#newPieChart) {
+            max-width: 350px;
+            max-height: 350px;
+            margin: 0 auto;
+        }
+
+        /* Chart Info Stilleri - Pie Chart Açıklamaları */
+        .chart-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        .chart-info-item {
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+
+        .chart-row .chart-card .chart-wrapper {
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container-ust-kartlar {
+                flex-direction: column;
+            }
+
+            .container-ust-kartlar .chart-card {
+                width: 100%;
+            }
+
+            .chart-row {
+                flex-direction: column;
+            }
+
+            .chart-row .chart-card {
+                width: 100%;
+                max-width: 100%;
+                min-height: 480px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EgeLife Otel</div>
+                <div class="sidebar-subtitle">Karar Destek Sistemi</div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/dashboard" class="menu-item">
+                    <span class="menu-text">Anasayfa</span>
+                </a>
+                <a href="/musteri-analizi" class="menu-item active">
+                    <span class="menu-text">Müşteri Analizi</span>
+                </a>
+                <a href="/oda-analizi" class="menu-item">
+                    <span class="menu-text">Oda Analizi</span>
+                </a>
+                <a href="/kampanya-raporu" class="menu-item">
+                    <span class="menu-text">Kampanya Raporu</span>
+                </a>
+                <a href="/memnuniyet-raporu" class="menu-item">
+                    <span class="menu-text">Memnuniyet Raporu</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">EgeLife Otel Karar Destek Sistemi</div>
+                <div>
+                    <a href="/login" class="logout-btn">Çıkış</a>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <h1 class="content-title" style="margin-bottom: 5px; font-size: 1.2rem; margin-top: 0; padding-top: 0;">
+                    Müşteri Analizi</h1>
+                <div id="default-values" data-default-yil="{{#if defaultYil}}{{defaultYil}}{{else}}2025{{/if}}"
+                    data-default-otel="{{#if defaultOtel}}{{defaultOtel.otel_id}}{{else}}{{/if}}" style="display:none;">
+                </div>
+
+
+
+
+
+
+
+                <!-- EN ÜST: İki Ana Grafik Yan Yana -->
+                <div class="container-ust-kartlar" style="margin-bottom: 8px;">
+                    <!-- Yıllık Otel Karşılaştırma Grafiği -->
+                    <div class="chart-card chart-medium" style="flex: 1;">
+                        <h3 style="font-size: 14px; margin-bottom: 4px; color: #323130;">Otellere Göre Müşteri
+                            Sayısı (2026 Tahminleriyle)</h3>
+                        <div class="year-selector" style="margin-bottom: 4px;">
+                            <label for="karsilastirmaYilSecimi" style="font-size: 12px;">Yıl Seçin:</label>
+                            <select id="karsilastirmaYilSecimi" style="padding: 2px; font-size: 12px;">
+                                {{#each yillar}}
+                                <option value="{{yil}}" {{#if @first}}selected{{/if}}>{{yil}}</option>
+                                {{/each}}
+                                <option value="2026">2026 (Tahmin)</option>
+                            </select>
+                        </div>
+                        <div class="chart-wrapper" style="flex: none; height: 280px;">
+                            <canvas id="otelKarsilastirmaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Müşteri Türü Dağılımı Grafiği (Yanına Geldi) -->
+                    <div class="chart-card chart-medium" style="flex: 1;">
+                        <h2 style="font-size: 14px; margin-bottom: 4px; color: #323130;">Tüm Müşteri Türlerinin
+                            Dağılımları</h2>
+                        <div class="year-selector" style="display: flex; gap: 15px; margin-bottom: 4px;">
+                            <div>
+                                <label for="newPieYearSelect" style="font-size: 12px;">Yıl Seçin:</label>
+                                <select id="newPieYearSelect" style="padding: 2px; font-size: 12px;">
+                                    {{#each yillar}}
+                                    <option value="{{yil}}" {{#if @first}}selected{{/if}}>{{yil}}</option>
+                                    {{/each}}
+                                    <option value="2026">2026 (Tahmin)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="newChartLoading" class="loading" style="display: none;">Yükleniyor...</div>
+
+                        <div id="newChartContainer" class="chart-wrapper" style="height: 280px;">
+                            <canvas id="newPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YENİ: Müşteri - Oda Tercih Analizi (Grouped Bar Chart) -->
+                <div class="chart-card chart-large" style="margin-top: 5px;">
+                    <div class="header-left">
+                        <h3 style="font-size: 14px; color: #323130; margin-bottom: 2px;">Müşteri Türlerinin Oda Tercih
+                            Eğilimleri</h3>
+                        <p class="chart-subtitle" style="color: #605E5C; font-size: 11px; margin-bottom: 5px;">
+                            Hangi müşteri segmenti hangi oda tipini daha çok tercih ediyor? (Rezervasyon yoğunluğu ve
+                            memnuniyet bazlı skor)
+                        </p>
+                    </div>
+                    <div class="year-selector" style="display: flex; gap: 15px; margin-bottom: 5px;">
+                        <div>
+                            <label for="prefYearSelect" style="font-size: 12px;">Yıl Seçin:</label>
+                            <select id="prefYearSelect" style="padding: 2px; font-size: 12px;">
+                                {{#each yillar}}
+                                <option value="{{yil}}" {{#if @first}}selected{{/if}}>{{yil}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="prefOtelSelect">Otel Seçin:</label>
+                            <select id="prefOtelSelect">
+                                <option value="all">Tüm Oteller</option>
+                                {{#each oteller}}
+                                <option value="{{otel_id}}">{{otel_adi}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrapper" style="height: 190px; position: relative;">
+                        <canvas id="roomPreferenceChart"></canvas>
+                        <div id="prefChartLoading"
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                            <span style="color: #0078d4; font-weight: bold;">Veriler Analiz Ediliyor...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personel Verimlilik ve Kalite Analizi (En alta taşındı) -->
+                <div class="chart-section" style="margin-top: 30px;">
+                    <div class="chart-header-row"
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="header-left">
+                            <h2 class="chart-section-title" style="font-size: 20px; color: #323130; margin: 0;">Personel
+                                Verimlilik ve Hizmet Kalitesi Analizi</h2>
+                            <p class="chart-subtitle" style="color: #605E5C; font-size: 14px; margin: 5px 0 0 0;">
+                                Müşteri yoğunluğunun personel iş yükü ve hizmet kalitesi üzerindeki etkisi</p>
+                        </div>
+                        <div class="header-right" style="display: flex; gap: 10px;">
+                            <select id="personelOtelSelect"
+                                style="padding: 6px 12px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 14px; color: #333; cursor: pointer; outline: none;">
+                                {{#each oteller}}
+                                <option value="{{otel_id}}">{{otel_adi}}</option>
+                                {{/each}}
+                            </select>
+                            <select id="personelYilSelect"
+                                style="padding: 6px 12px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 14px; color: #333; cursor: pointer; outline: none;">
+                                {{#each yillar}}
+                                <option value="{{yil}}" {{#if @first}}selected{{/if}}>{{yil}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="chart-card"
+                        style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: 450px; position: relative;">
+                        <canvas id="personelVerimlilikChart"></canvas>
+                        <div id="loadingPersonel"
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="text-align: center;">
+                                <div class="spinner"
+                                    style="border: 4px solid #f3f3f3; border-top: 4px solid #0078d4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px auto;">
+                                </div>
+                                <span style="color: #0078d4; font-weight: 500;">Veriler Analiz Ediliyor...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YENİ: İş Gücü Simülasyon Paneli (Ayrı Kart) -->
+                <div class="chart-card"
+                    style="margin-top: 15px; background: linear-gradient(to right, #f8f9fa, #ffffff); border-left: 5px solid #0078d4;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h3
+                                style="font-size: 16px; color: #323130; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 20px;">🎮</span> İş Yükü Müşteri Memnuniyeti Tahmini
+                            </h3>
+                            <p style="color: #605E5C; font-size: 12px; margin: 4px 0 0 0;">
+                                Personel sayısı ve niteliğindeki değişimlerin iş yükü ve memnuniyete etkisini test edin.
+                            </p>
+                        </div>
+                        <div class="simulation-badge"
+                            style="background: #e1dfdd; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; color: #323130;">
+                            Tahmin Modu Aktif
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                        <!-- Kontroller -->
+                        <div style="flex: 1; min-width: 300px; padding-right: 20px; border-right: 1px solid #edebe9;">
+                            <!-- Slider 1: Personel Sayısı -->
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #323130;">Personel Takviyesi
+                                        / Azaltımı</label>
+                                    <span id="staffVal" style="font-size: 13px; color: #0078d4; font-weight: 700;">0
+                                        Kişi</span>
+                                </div>
+                                <input type="range" id="staffSlider" min="-10" max="10" value="0" step="1"
+                                    style="width: 100%; height: 6px; background: #d1d1d1; border-radius: 3px; outline: none;">
+                                <div
+                                    style="display: flex; justify-content: space-between; font-size: 10px; color: #666; margin-top: 4px;">
+                                    <span>-10 (Tasarruf)</span>
+                                    <span>Mevcut Durum</span>
+                                    <span>+10 (Yatırım)</span>
+                                </div>
+                            </div>
+
+                            <!-- Slider 2: Eğitim Seviyesi -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <label style="font-size: 13px; font-weight: 600; color: #323130;">Personel Eğitim
+                                        Seviyesi</label>
+                                    <span id="trainingVal"
+                                        style="font-size: 13px; color: #0078d4; font-weight: 700;">Standart</span>
+                                </div>
+                                <select id="trainingSelect"
+                                    style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #c8c6c4; font-size: 13px;">
+                                    <option value="1">Standart (Mevcut)</option>
+                                    <option value="1.1">Deneyimli (+%10 Verim)</option>
+                                    <option value="1.25">Uzman (+%25 Verim)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sonuç Göstergeleri -->
+                        <div style="flex: 1; min-width: 300px; display: flex; gap: 15px;">
+                            <!-- Maliyet Kartı -->
+                            <div
+                                style="flex: 1; background: #fff; border: 1px solid #e1dfdd; border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 12px; color: #605E5C; margin-bottom: 5px;">Tahmini Aylık Maliyet
+                                </div>
+                                <div id="simCost" style="font-size: 18px; font-weight: 700; color: #323130;">₺0</div>
+                                <div style="font-size: 11px; color: #a4262c; margin-top: 4px;">Personel Gideri</div>
+                            </div>
+
+                            <!-- Verimlilik Kartı -->
+                            <div
+                                style="flex: 1; background: #fff; border: 1px solid #e1dfdd; border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 12px; color: #605E5C; margin-bottom: 5px;">İş Yükü Değişimi</div>
+                                <div id="simWorkload" style="font-size: 18px; font-weight: 700; color: #0078d4;">%0
+                                </div>
+                                <div style="font-size: 11px; color: #605E5C; margin-top: 4px;">Kişi Başı Yük</div>
+                            </div>
+
+                            <!-- Memnuniyet Kartı -->
+                            <div
+                                style="flex: 1; background: #eff6fc; border: 1px solid #c7e0f4; border-radius: 6px; padding: 15px; text-align: center;">
+                                <div style="font-size: 12px; color: #005a9e; margin-bottom: 5px;">Öngörülen Memnuniyet
+                                </div>
+                                <div id="simSatisfaction" style="font-size: 18px; font-weight: 700; color: #107c10;">--
+                                </div>
+                                <div style="font-size: 11px; color: #107c10; margin-top: 4px;">Potansiyel Etki</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        // ============================================
+        // SİMÜLASYON MANTIĞI
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function () {
+            const staffSlider = document.getElementById('staffSlider');
+            const staffVal = document.getElementById('staffVal');
+            const trainingSelect = document.getElementById('trainingSelect');
+            const trainingVal = document.getElementById('trainingVal');
+
+            const simCost = document.getElementById('simCost');
+            const simWorkload = document.getElementById('simWorkload');
+            const simSatisfaction = document.getElementById('simSatisfaction');
+
+            // Sabitler (Varsayılan)
+            const BASE_SALARY = 25000; // TL
+            const BASE_STAFF = 20; // Varsayılan personel sayısı
+
+            function updateSimulation() {
+                const deltaStaff = parseInt(staffSlider.value);
+                const efficiencyMultiplier = parseFloat(trainingSelect.value);
+
+                // 1. Text Güncelleme
+                staffVal.textContent = (deltaStaff > 0 ? '+' : '') + deltaStaff + ' Kişi';
+                trainingVal.textContent = trainingSelect.options[trainingSelect.selectedIndex].text.split('(')[0].trim();
+
+                // 2. Maliyet Hesabı
+                const costImpact = deltaStaff * BASE_SALARY;
+                simCost.textContent = (costImpact > 0 ? '+' : '') + costImpact.toLocaleString('tr-TR') + ' ₺';
+                simCost.style.color = costImpact > 0 ? '#a4262c' : (costImpact < 0 ? '#107c10' : '#323130');
+
+                // 3. İş Yükü Hesabı (Basit Model)
+                // Yeni Yük = Eski Yük * (Eski Personel / (Eski Personel + Eklenen)) / Verimlilik
+                const newTotalStaff = BASE_STAFF + deltaStaff;
+                // Personel sayısı 1'in altına düşmesin 
+                const safeStaff = Math.max(1, newTotalStaff);
+                const workloadRatio = (BASE_STAFF / safeStaff) / efficiencyMultiplier;
+                const workloadChangePercent = ((workloadRatio - 1) * 100).toFixed(1);
+
+                simWorkload.textContent = (workloadChangePercent > 0 ? '+' : '') + workloadChangePercent + '%';
+                simWorkload.style.color = workloadChangePercent > 0 ? '#a4262c' : '#107c10'; // Yük artarsa kırmızı, azalırsa yeşil
+
+                // 4. Memnuniyet Tahmini
+                // İş yükü %10 artarsa, memnuniyet 0.1 puan düşer (Varsayım)
+                // İş yükü %10 azalırsa, memnuniyet 0.1 puan artar.
+                // Verimlilik artışı (eğitim) ekstra bonus verir.
+
+                let satisfactionImpact = (workloadChangePercent * -1) / 100; // Ters orantı
+
+                // Eğitim bonusu
+                if (efficiencyMultiplier > 1) {
+                    satisfactionImpact += (efficiencyMultiplier - 1) * 0.5; // Her %10 verim için 0.05 puan bonus
+                }
+
+                const sign = satisfactionImpact > 0 ? '+' : '';
+                simSatisfaction.textContent = sign + satisfactionImpact.toFixed(2) + ' Puan';
+
+                // Grafikteki "Tahmin" çizgisini güncelleme
+                if (typeof updateChartSimulation === 'function') {
+                    updateChartSimulation(workloadChangePercent, satisfactionImpact);
+                }
+            }
+
+            // Grafik Güncelleme Fonksiyonu
+            function updateChartSimulation(workloadPercent, satisfactionChange) {
+                console.log('=== [Simülatör] Grafik Güncelleme Tetiklendi ===');
+                console.log('Parametreler:', { workloadPercent, satisfactionChange });
+
+                // Global değişkene erişim kontrolü (window üzerinden)
+                if (!window.personelChart) {
+                    console.error('❌ [Simülatör] window.personelChart bulunamadı!');
+                    return;
+                }
+                if (!window.originalIsYukuData || window.originalIsYukuData.length === 0) {
+                    console.error('❌ [Simülatör] Orijinal Veri (originalIsYukuData) yok veya boş!');
+                    return;
+                }
+
+                console.log('✅ [Simülatör] Orijinal Veri Örneği (İlk Ay):', window.originalIsYukuData[0]);
+
+                // 1. Yeni İş Yükü Datasını Hesapla (Oransal değişim)
+                const newIsYukuData = window.originalIsYukuData.map(val => {
+                    // Sayısal değer kontrolü
+                    const numericVal = parseFloat(val) || 0;
+                    const change = numericVal * (parseFloat(workloadPercent) / 100);
+                    // Negatif olamaz
+                    return Math.max(0, numericVal + change);
+                });
+
+                // 2. Yeni Memnuniyet Datasını Hesapla (Puan değişimi)
+                const newMemnuniyetData = window.originalMemnuniyetData.map(val => {
+                    const numericVal = parseFloat(val) || 0;
+                    let newVal = numericVal + parseFloat(satisfactionChange);
+                    // 0-5.5 arası sınırla
+                    return Math.min(5.5, Math.max(0, newVal));
+                });
+
+                console.log('✅ [Simülatör] Yeni İş Yükü Hesaplanıyor... Örnek:', newIsYukuData[0]);
+                console.log('✅ [Simülatör] Yeni Memnuniyet Hesaplanıyor... Örnek:', newMemnuniyetData[0]);
+
+                // 3. Grafiği Güncelle
+                // Datasetleri İSİMLERİNE göre bul (Daha güvenli)
+                const isYukuDataset = window.personelChart.data.datasets.find(d => d.label.includes('İş Yükü'));
+                const memnuniyetDataset = window.personelChart.data.datasets.find(d => d.label.includes('Memnuniyet'));
+
+                let updatedCount = 0;
+
+                if (isYukuDataset) {
+                    console.log('✅ [Simülatör] İş Yükü Dataseti Bulundu. Güncelleniyor...');
+                    isYukuDataset.data = newIsYukuData;
+                    // Değişim varsa kesikli çizgi yap
+                    isYukuDataset.borderDash = parseFloat(workloadPercent) !== 0 ? [5, 5] : [];
+                    updatedCount++;
+                } else {
+                    console.warn('⚠️ [Simülatör] "İş Yükü" dataseti bulunamadı!');
+                }
+
+                if (memnuniyetDataset) {
+                    console.log('✅ [Simülatör] Memnuniyet Dataseti Bulundu. Güncelleniyor...');
+                    memnuniyetDataset.data = newMemnuniyetData;
+                    memnuniyetDataset.borderDash = parseFloat(satisfactionChange) !== 0 ? [5, 5] : [];
+                    updatedCount++;
+                } else {
+                    console.warn('⚠️ [Simülatör] "Memnuniyet" dataseti bulunamadı!');
+                }
+
+                if (updatedCount > 0) {
+                    window.personelChart.update('none'); // Animasyonsuz güncelle
+                    console.log('🚀 [Simülatör] Grafik update() komutu gönderildi.');
+                } else {
+                    console.error('❌ [Simülatör] Hiçbir dataset güncellenemedi!');
+                }
+            }
+
+
+            // Event Listeners
+            if (staffSlider) staffSlider.addEventListener('input', updateSimulation);
+            if (trainingSelect) trainingSelect.addEventListener('change', updateSimulation);
+
+            // Başlangıç durumu
+            if (staffSlider) updateSimulation();
+        });
+    </script>
+    <script>
+        // Varsayılan değerler (backend'den gelen veriler)
+        const defaultValuesEl = document.getElementById('default-values');
+        const defaultYil = defaultValuesEl ? (defaultValuesEl.getAttribute('data-default-yil') || '2025') : '2025';
+        const defaultOtel = defaultValuesEl ? (defaultValuesEl.getAttribute('data-default-otel') || null) : null;
+
+        console.log('=== GRAFİK YÜKLEME BAŞLADI ===');
+        console.log('Varsayılan Yıl:', defaultYil);
+        console.log('Varsayılan Otel:', defaultOtel);
+
+        // Global değişkenler - en üstte tanımlı
+        let newPieChart = null; // Tüm müşteri türleri
+        let prefChart = null;
+
+        // Chart.js yüklendi mi kontrol et
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js yüklenemedi!');
+            document.body.innerHTML += `<div style="position: fixed; top: 0; left: 0; right: 0; background: #e74c3c; color: white; padding: 20px; text-align: center; z-index: 9999;">Chart.js yüklenemedi! Lütfen internet bağlantınızı kontrol edin.</div>`;
+        }
+
+
+        // Grafik 2: Yıl bazında 7 Müşteri Türü Dağılımı (Genel - Tüm Oteller)
+        const newPieYearSelect = document.getElementById('newPieYearSelect');
+
+        // İlk yılı otomatik seç
+        if (newPieYearSelect && newPieYearSelect.options.length > 0 && !newPieYearSelect.value) {
+            newPieYearSelect.selectedIndex = 0;
+        }
+
+        if (newPieYearSelect) {
+            const chartTitleEl = document.querySelector('.chart-card h2');
+
+            function updateTitle(year) {
+                if (chartTitleEl) {
+                    if (year === '2026') {
+                        chartTitleEl.textContent = 'Tüm Müşteri Türlerinin Dağılımları (2026 Dağılımlarıyla)';
+                    } else {
+                        chartTitleEl.textContent = 'Tüm Müşteri Türlerinin Dağılımları';
+                    }
+                }
+            }
+
+            newPieYearSelect.addEventListener('change', function () {
+                const selectedYear = this.value;
+                if (selectedYear) {
+                    updateTitle(selectedYear);
+                    loadMusteriTurDagilimiYilOtelBazli(selectedYear);
+                }
+            });
+
+            // Sayfa yüklendiğinde seçili yıl ile grafiği otomatik yükle
+            const selectedYear = newPieYearSelect.value;
+            if (selectedYear) {
+                updateTitle(selectedYear);
+                setTimeout(() => {
+                    loadMusteriTurDagilimiYilOtelBazli(selectedYear);
+                }, 200);
+            }
+        }
+
+
+        // Grafik 2: Yıl bazında 7 Müşteri Türü Dağılımı (Genel)
+        async function loadMusteriTurDagilimiYilOtelBazli(year = '') {
+            const loadingEl = document.getElementById('newChartLoading');
+            const chartContainer = document.getElementById('newChartContainer');
+            const chartInfo = document.getElementById('newChartInfo');
+
+            // Loading'i kapat fonksiyonu
+            const hideLoading = () => {
+                if (loadingEl) loadingEl.style.display = 'none';
+            };
+
+            // Hata göster fonksiyonu
+            const showError = (errorMessage) => {
+                hideLoading();
+                if (chartContainer) {
+                    chartContainer.style.display = 'block';
+                    chartContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #e74c3c;">Veri yüklenirken hata
+            oluştu.<br><small>${errorMessage}</small></p>`;
+                }
+                if (chartInfo) chartInfo.style.display = 'none';
+            };
+
+            if (!year || year === '' || year === 'all') {
+                if (newPieChart) {
+                    newPieChart.destroy();
+                    newPieChart = null;
+                }
+                hideLoading();
+                if (chartContainer) {
+                    chartContainer.style.display = 'block';
+                    chartContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #7f8c8d;">Lütfen yıl seçin.</p>`;
+                }
+                if (chartInfo) chartInfo.style.display = 'none';
+                return;
+            }
+
+            // Loading'i göster
+            if (loadingEl) loadingEl.style.display = 'block';
+            // Container'ı gizle ama canvas'a erişilebilir kalmalı
+            if (chartContainer) {
+                // Canvas'ın varlığını kontrol et ve yoksa oluştur
+                let canvas = document.getElementById('newPieChart');
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = 'newPieChart';
+                    chartContainer.innerHTML = ''; // Eski içeriği temizle
+                    chartContainer.appendChild(canvas);
+                }
+                chartContainer.style.display = 'none';
+            }
+            if (chartInfo) chartInfo.style.display = 'none';
+
+            try {
+                // Otel ID parametresini kaldırarak (veya all göndererek) genel dağılımı istiyoruz
+                const url = `/api/musteri/tur-dagilimi?yil=${year}&otelId=all`;
+                console.log('🔵 Müşteri türü dağılımı analizi API isteği (Genel):', url);
+
+                const res = await fetch(url);
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`HTTP Error ${res.status}: ${errorText}`);
+                }
+
+                const data = await res.json();
+                console.log('🟢 Müşteri türü dağılımı analizi verisi:', data);
+
+                // Response formatı: { turler: [{ tur_id: 1, ad: "...", sayi: X }, ...] }
+                const turler = data.turler || [];
+                console.log('🟢 Turler array:', turler);
+                console.log('🟢 Turler length:', turler.length);
+
+                if (!Array.isArray(turler)) {
+                    throw new Error('API response formatı hatalı: turler bir array olmalı');
+                }
+
+                const labels = turler.map(item => item.ad || 'Bilinmeyen');
+                const dataValues = turler.map(item => parseInt(item.sayi) || 0);
+                const total = dataValues.reduce((a, b) => a + b, 0);
+
+                console.log('🟢 Labels:', labels);
+                console.log('🟢 Data values:', dataValues);
+                console.log('🟢 Total:', total);
+
+                if (total === 0 || labels.length === 0) {
+                    if (newPieChart) {
+                        newPieChart.destroy();
+                        newPieChart = null;
+                    }
+                    hideLoading();
+                    if (chartContainer) {
+                        chartContainer.style.display = 'block';
+                        chartContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #7f8c8d;">Seçilen yıl için veri bulunamadı.</p>`;
+                    }
+                    if (chartInfo) chartInfo.style.display = 'none';
+                    return;
+                }
+
+                // 7 renk paleti (7 müşteri türü için)
+                const colorPalette = [
+                    'rgba(52, 152, 219, 0.8)', // Mavi
+                    'rgba(231, 76, 60, 0.8)', // Kırmızı
+                    'rgba(46, 204, 113, 0.8)', // Yeşil
+                    'rgba(241, 196, 15, 0.8)', // Sarı
+                    'rgba(155, 89, 182, 0.8)', // Mor
+                    'rgba(230, 126, 34, 0.8)', // Turuncu
+                    'rgba(26, 188, 156, 0.8)' // Turkuaz
+                ];
+                const borderColorPalette = [
+                    'rgba(52, 152, 219, 1)',
+                    'rgba(231, 76, 60, 1)',
+                    'rgba(46, 204, 113, 1)',
+                    'rgba(241, 196, 15, 1)',
+                    'rgba(155, 89, 182, 1)',
+                    'rgba(230, 126, 34, 1)',
+                    'rgba(26, 188, 156, 1)'
+                ];
+
+                const chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Müşteri Türü Dağılımı',
+                        data: dataValues,
+                        backgroundColor: labels.map((_, index) => colorPalette[index % colorPalette.length]),
+                        borderColor: labels.map((_, index) => borderColorPalette[index % borderColorPalette.length]),
+                        borderWidth: 2
+                    }]
+                };
+
+                // Canvas'ı bul - container gizli olsa bile erişilebilir olmalı
+                let canvas = document.getElementById('newPieChart');
+                if (!canvas) {
+                    // Canvas yoksa oluştur
+                    const container = document.getElementById('newChartContainer');
+                    if (!container) {
+                        throw new Error('Chart container bulunamadı!');
+                    }
+                    canvas = document.createElement('canvas');
+                    canvas.id = 'newPieChart';
+                    container.innerHTML = ''; // Eski içeriği temizle
+                    container.appendChild(canvas);
+                }
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error('Canvas context alınamadı!');
+                }
+
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 14, weight: '500' },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value.toLocaleString('tr-TR')} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // Grafiği güncelle veya oluştur
+                if (newPieChart) {
+                    // Mevcut grafiği destroy et ve yeniden oluştur (oranların doğru görünmesi için)
+                    newPieChart.destroy();
+                    newPieChart = null;
+                }
+
+                newPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: chartData,
+                    options: chartOptions
+                });
+
+                hideLoading();
+                if (chartContainer) chartContainer.style.display = 'block';
+                if (chartInfo) {
+                    chartInfo.style.display = 'flex';
+                    chartInfo.innerHTML = '';
+
+                    labels.forEach((label, index) => {
+                        const value = dataValues[index] || 0;
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+
+                        const item = document.createElement('div');
+                        item.className = 'chart-info-item';
+                        item.innerHTML = `
+        <span class="chart-info-label">${label}:</span>
+        <span class="chart-info-value">${value.toLocaleString('tr-TR')} (${percentage}%)</span>
+        `;
+                        chartInfo.appendChild(item);
+                    });
+
+                    const totalItem = document.createElement('div');
+                    totalItem.className = 'chart-info-item';
+                    totalItem.style.fontWeight = 'bold';
+                    totalItem.style.marginTop = '10px';
+                    totalItem.style.paddingTop = '10px';
+                    totalItem.style.borderTop = '1px solid #ddd';
+                    totalItem.innerHTML = `
+        <span class="chart-info-label">Toplam:</span>
+        <span class="chart-info-value">${total.toLocaleString('tr-TR')}</span>
+        `;
+                    chartInfo.appendChild(totalItem);
+                }
+            } catch (err) {
+                console.error('🔴 Müşteri türü dağılımı analizi veri yükleme hatası:', err);
+                showError(err.message || 'Bilinmeyen hata');
+            }
+        }
+
+
+
+
+
+        // ============================================
+        // 2. Yıllık Otel Karşılaştırma Grafiği (Bar Chart)
+        // ============================================
+        let otelKarsilastirmaChart = null;
+        const karsilastirmaYilSecimi = document.getElementById('karsilastirmaYilSecimi');
+
+        function loadOtelKarsilastirma(yil) {
+            if (!yil) {
+                if (otelKarsilastirmaChart) {
+                    otelKarsilastirmaChart.destroy();
+                    otelKarsilastirmaChart = null;
+                }
+                return;
+            }
+
+            // 2026 için hem 2025 gerçek hem de 2026 tahmin verilerini göster
+            if (yil === '2026') {
+                // MVC yapısına uygun: Controller'dan hem 2025 hem 2026 verilerini al
+                Promise.all([
+                    fetch('/api/musteri/otel-karsilastirma?yil=2025').then(r => r.json()),
+                    fetch('/api/musteri/otel-karsilastirma?yil=2026').then(r => r.json())
+                ])
+                    .then(([data2025, data2026]) => {
+                        const canvas = document.getElementById('otelKarsilastirmaChart');
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return;
+
+                        if (otelKarsilastirmaChart) {
+                            otelKarsilastirmaChart.destroy();
+                            otelKarsilastirmaChart = null;
+                        }
+
+                        otelKarsilastirmaChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data2025.oteller || [],
+                                datasets: [
+                                    {
+                                        label: '2025 (Gerçek)',
+                                        data: data2025.toplamlar || [],
+                                        backgroundColor: 'rgba(78, 121, 167, 0.8)',
+                                        borderColor: 'rgba(78, 121, 167, 1)',
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: '2026 (TÜİK Tahmini)',
+                                        data: data2026.toplamlar || [],
+                                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                                        borderColor: 'rgba(255, 159, 64, 1)',
+                                        borderWidth: 1
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 15,
+                                            font: { size: 12 }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            afterLabel: function (context) {
+                                                if (context.datasetIndex === 1) {
+                                                    return 'Bölgesel büyüme oranları ile hesaplanmıştır';
+                                                }
+                                                return '';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        ticks: {
+                                            maxRotation: 45,
+                                            minRotation: 45,
+                                            autoSkip: false
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function (value) {
+                                                return value.toLocaleString('tr-TR');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        // 2026 tahmin metodolojisi bilgisini göster (MVC yapısına uygun)
+                        const infoEl = document.getElementById('otelKarsilastirmaInfo');
+                        if (infoEl) {
+                            infoEl.style.display = 'block';
+                            infoEl.innerHTML = `
+        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+            <strong>TÜİK Bazlı Tahmin Metodolojisi (MVC):</strong><br>
+            <em>Müşteri₂₀₂₆ = Müşteri₂₀₂₅ × (1 + Bölgesel_Büyüme_Oranı) × (1 + 0.025)</em><br><br>
+            <strong>Bölgesel Büyüme Oranları:</strong>
+            Bodrum: %7.5, Kuşadası: %6.2, Marmaris: %5.8, Çeşme: %6.8, Pamukkale: %4.5, Fethiye: %8.2<br>
+            <strong>Genel Turizm Büyümesi:</strong> %2.5 (TÜİK 2024 projeksiyonu)<br>
+            <small><em>* İş mantığı Controller katmanında hesaplanmaktadır (MVC)</em></small>
+        </div>
+        `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('2026 otel karşılaştırma chart hatası:', error);
+                        if (otelKarsilastirmaChart) {
+                            otelKarsilastirmaChart.destroy();
+                            otelKarsilastirmaChart = null;
+                        }
+
+                        // Hata durumunda info panelini gizle
+                        const infoEl = document.getElementById('otelKarsilastirmaInfo');
+                        if (infoEl) {
+                            infoEl.style.display = 'none';
+                        }
+                    });
+                return;
+            }
+
+            // Diğer yıllar için normal tek dataset
+            fetch(`/api/musteri/otel-karsilastirma?yil=${yil}`)
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP Error ${r.status}`);
+                    return r.json();
+                })
+                .then(data => {
+                    const canvas = document.getElementById('otelKarsilastirmaChart');
+                    if (!canvas) return;
+
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+
+                    if (otelKarsilastirmaChart) {
+                        otelKarsilastirmaChart.destroy();
+                        otelKarsilastirmaChart = null;
+                    }
+
+                    otelKarsilastirmaChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.oteller || [],
+                            datasets: [{
+                                label: `${yil} Toplam Müşteri`,
+                                data: data.toplamlar || [],
+                                backgroundColor: 'rgba(78, 121, 167, 0.8)',
+                                borderColor: 'rgba(78, 121, 167, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        maxRotation: 45,
+                                        minRotation: 45,
+                                        autoSkip: false
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function (value) {
+                                            return value.toLocaleString('tr-TR');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Diğer yıllar için info panelini gizle
+                    const infoEl = document.getElementById('otelKarsilastirmaInfo');
+                    if (infoEl) {
+                        infoEl.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Otel karşılaştırma chart hatası:', error);
+                    if (otelKarsilastirmaChart) {
+                        otelKarsilastirmaChart.destroy();
+                        otelKarsilastirmaChart = null;
+                    }
+
+                    // Hata durumunda info panelini gizle
+                    const infoEl = document.getElementById('otelKarsilastirmaInfo');
+                    if (infoEl) {
+                        infoEl.style.display = 'none';
+                    }
+                });
+        }
+
+        if (karsilastirmaYilSecimi) {
+            // İlk yılı otomatik seç
+            if (karsilastirmaYilSecimi.options.length > 0 && !karsilastirmaYilSecimi.value) {
+                karsilastirmaYilSecimi.selectedIndex = 0;
+            }
+
+            karsilastirmaYilSecimi.addEventListener('change', function () {
+                const yil = this.value;
+                if (yil) {
+                    loadOtelKarsilastirma(yil);
+                }
+            });
+
+            // Sayfa yüklendiğinde seçili yıl ile grafiği otomatik yükle
+            const karsilastirmaYil = karsilastirmaYilSecimi.value;
+            if (karsilastirmaYil) {
+                setTimeout(() => {
+                    loadOtelKarsilastirma(karsilastirmaYil);
+                }, 500);
+            }
+        }
+        // ============================================
+        // 6. Personel Verimlilik ve Hizmet Kalitesi Analizi
+        // ============================================
+        // Global kapsamda tanımla (Window objesine ata)
+        window.personelChart = null;
+        window.originalIsYukuData = [];
+        window.originalMemnuniyetData = [];
+
+        async function loadPersonelVerimlilikChart() {
+            const chartCanvas = document.getElementById('personelVerimlilikChart');
+            const loading = document.getElementById('loadingPersonel');
+
+
+            // Filtreleri al
+            const yilSelect = document.getElementById('personelYilSelect');
+            const otelSelect = document.getElementById('personelOtelSelect');
+
+            // Eğer selectler sayfada yoksa (henüz render edilmediyse veya hata varsa)
+            if (!yilSelect || !otelSelect) {
+                console.warn("Personel tablosu filtreleri bulunamadı.");
+                return;
+            }
+
+            const yil = yilSelect.value;
+            const otelId = otelSelect.value;
+
+            if (!chartCanvas) return;
+
+            if (loading) loading.style.display = 'block';
+
+
+            try {
+                console.log(`🔵 Personel Verimlilik Analizi isteniyor: Yıl=${yil}, Otel=${otelId}`);
+
+
+                const response = await fetch(`/api/personel-verimlilik?yil=${yil}&otel_id=${otelId}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Hatası: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    if (window.personelChart) {
+                        window.personelChart.data.datasets.forEach((dataset) => { dataset.data = []; });
+                        window.personelChart.update();
+                    }
+                    if (loading) loading.style.display = 'none';
+                    return;
+                }
+
+
+
+                // Verileri ayıkla
+                const labels = data.map(d => d.ay);
+                const musteriData = data.map(d => d.musteri_sayisi);
+                const isYukuData = data.map(d => parseFloat(d.is_yuku) || 0); // Sayısal güvenlik
+                const memnuniyetData = data.map(d => parseFloat(d.memnuniyet_puani) || 0); // Sayısal güvenlik
+
+                // Store original data globally
+                window.originalIsYukuData = [...isYukuData];
+                window.originalMemnuniyetData = [...memnuniyetData];
+
+                console.log('✅ [Veri Yükleme] Orijinal Veriler Kaydedildi:', {
+                    isYuku: window.originalIsYukuData.length,
+                    memnuniyet: window.originalMemnuniyetData.length
+                });
+
+                const ctx = chartCanvas.getContext('2d');
+
+                if (window.personelChart) {
+                    window.personelChart.destroy();
+                    window.personelChart = null;
+                }
+
+                window.personelChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Toplam Müşteri',
+                                data: musteriData,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                hoverBackgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                yAxisID: 'y',
+                                order: 3,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'İş Yükü (Kişi Başı Müşteri)',
+                                data: isYukuData,
+                                type: 'line',
+                                borderColor: '#d9534f',
+                                backgroundColor: '#d9534f',
+                                borderWidth: 3,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#fff',
+                                pointBorderWidth: 2,
+                                yAxisID: 'y1',
+                                order: 2,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Memnuniyet Puanı',
+                                data: memnuniyetData,
+                                type: 'line',
+                                borderColor: '#5cb85c',
+                                backgroundColor: '#5cb85c',
+                                borderWidth: 3,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#fff',
+                                pointBorderWidth: 2,
+                                yAxisID: 'y2',
+                                order: 1,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { usePointStyle: true, padding: 20, boxWidth: 12 }
+                            },
+                            tooltip: {
+                                padding: 12,
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                titleColor: '#333',
+                                bodyColor: '#666',
+                                borderColor: '#e1e1e1',
+                                borderWidth: 1,
+                                titleFont: { size: 14, weight: 'bold' },
+                                bodyFont: { size: 13 },
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.dataset.label || '';
+                                        let value = context.parsed.y;
+                                        if (label.includes('Memnuniyet')) return `${label}: ${value} ⭐`;
+                                        if (label.includes('İş Yükü')) return `${label}: ${value} kişi`;
+                                        return `${label}: ${value.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Müşteri Sayısı' },
+                                grid: { color: '#f0f0f0' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'İş Yükü', color: '#d9534f' },
+                                grid: { drawOnChartArea: false },
+                                min: 0
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: 'Memnuniyet', color: '#5cb85c' },
+                                min: 0,
+                                max: 5.5
+                            }
+                        }
+                    }
+                });
+
+                // Basit Insight Oluşturma
+
+
+            } catch (err) {
+                console.error("Personel Grafik hatası:", err);
+                console.error("Personel Grafik hatası:", err);
+                if (loading) loading.style.display = 'none';
+            } finally {
+                if (loading) loading.style.display = 'none';
+            }
+        }
+
+        // Event Listeners for Personel Chart Filters
+        const personelYilSelect = document.getElementById('personelYilSelect');
+        const personelOtelSelect = document.getElementById('personelOtelSelect');
+
+        if (personelYilSelect) {
+            personelYilSelect.addEventListener('change', loadPersonelVerimlilikChart);
+        }
+        if (personelOtelSelect) {
+            personelOtelSelect.addEventListener('change', loadPersonelVerimlilikChart);
+        }
+
+        // Sayfa yüklendiğinde tüm grafikleri yükle
+
+        function initAllCharts() {
+            console.log('=== TÜM GRAFİKLER YÜKLENİYOR ===');
+            console.log('İlk yıllar otomatik seçili, grafikler yükleniyor...');
+
+            // Grafik 0: Personel Verimlilik (YENİ) - Hemen yükle
+            loadPersonelVerimlilikChart();
+
+            // Grafik 1: Yerli/Yabancı - İlk yıl otomatik seçili, grafiği yükle
+            setTimeout(() => {
+                try {
+                    const oldPieYearSelect = document.getElementById('oldPieYearSelect');
+                    if (oldPieYearSelect && oldPieYearSelect.value) {
+                        console.log('✓ Grafik 1 yükleniyor (Yerli/Yabancı) - Yıl:', oldPieYearSelect.value);
+                        loadYerliYabanciToplamYilBazli(oldPieYearSelect.value);
+                    }
+                } catch (e) {
+                    console.error('✗ Grafik 1 hatası:', e);
+                }
+            }, 200);
+
+            // Grafik 2: Otele Göre Müşteri Türü - İlk yıl ve otel otomatik seçili
+            setTimeout(() => {
+                try {
+                    const newPieYearSelect = document.getElementById('newPieYearSelect');
+                    const newPieOtelSelect = document.getElementById('newPieOtelSelect');
+                    if (newPieYearSelect && newPieOtelSelect && newPieYearSelect.value && newPieOtelSelect.value) {
+                        console.log('✓ Grafik 2 yükleniyor (Otele Göre) - Yıl:', newPieYearSelect.value, 'Otel:',
+                            newPieOtelSelect.value);
+                        loadMusteriTurDagilimiYilOtelBazli(newPieYearSelect.value, newPieOtelSelect.value);
+                    }
+                } catch (e) {
+                    console.error('✗ Grafik 2 hatası:', e);
+                }
+            }, 400);
+
+
+
+
+
+            // Grafik 5: Otel Karşılaştırma - İlk yıl otomatik seçili
+            setTimeout(() => {
+                try {
+                    const karsilastirmaYilSecimi = document.getElementById('karsilastirmaYilSecimi');
+                    if (karsilastirmaYilSecimi && karsilastirmaYilSecimi.value) {
+                        console.log('✓ Grafik 5 yükleniyor (Otel Karşılaştırma) - Yıl:', karsilastirmaYilSecimi.value);
+                        loadOtelKarsilastirma(karsilastirmaYilSecimi.value);
+                    }
+                } catch (e) {
+                    console.error('✗ Grafik 5 hatası:', e);
+                }
+            }, 1000);
+
+            // Grafik 6: Oda Tercih Analizi (Grouped Bar Chart)
+            setTimeout(() => {
+                try {
+                    const prefYearSelect = document.getElementById('prefYearSelect');
+                    if (prefYearSelect) {
+                        // İlk yükleme
+                        loadRoomPreferenceChart();
+                    }
+                } catch (e) {
+                    console.error('✗ Oda Tercih Grafik hatası:', e);
+                }
+            }, 1200);
+        }
+
+        // Grafik 6: Kampanya Small Multiples (Eski Radar Chart)
+        let campaignCharts = [];
+
+
+        async function loadRadarChart() {
+            const year = document.getElementById('radarYearSelect').value;
+            const kampanyaId = document.getElementById('radarKampanyaSelect').value;
+            const loadingEl = document.getElementById('radarChartLoading');
+            const container = document.getElementById('campaignMultiplesContainer');
+
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (container) container.style.opacity = '0.5';
+
+            try {
+                const res = await fetch(`/api/musteri/kampanya-etkisi?yil=${year}&kampanyaId=${kampanyaId}`);
+                if (!res.ok) throw new Error("API Error");
+                const data = await res.json();
+
+                campaignCharts.forEach(c => c.destroy());
+                campaignCharts = [];
+                if (container) {
+                    container.innerHTML = '';
+                    container.style.opacity = '1';
+                }
+
+                if (!data.datasets || data.datasets.length === 0) {
+                    if (container) container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #605e5c;">Seçilen kriterlere uygun otel verisi bulunamadı.</p>`;
+                    return;
+                }
+
+                // Radar Grafikler için Renk Paleti
+                const colors = ['#0078d4', '#107c10', '#d83b01', '#5B2D91', '#b40000', '#00bcf2', '#004b50'];
+
+                data.datasets.forEach((dataset, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'campaign-item';
+
+                    const title = document.createElement('div');
+                    title.className = 'campaign-item-title';
+                    title.style.textAlign = 'center';
+                    title.innerText = dataset.label; // Otel Adı
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'campaign-mini-wrapper';
+                    wrapper.style.height = '220px';
+
+                    const canvas = document.createElement('canvas');
+                    wrapper.appendChild(canvas);
+
+                    itemDiv.appendChild(title);
+                    itemDiv.appendChild(wrapper);
+                    if (container) container.appendChild(itemDiv);
+
+                    const ctx = canvas.getContext('2d');
+                    const color = colors[index % colors.length];
+
+                    const chart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Etki Derecesi',
+                                data: dataset.data,
+                                backgroundColor: color + '33', // Daha şeffaf dolgu
+                                borderColor: color,
+                                borderWidth: 2,
+                                pointBackgroundColor: color,
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: color,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => `${context.label}: %${context.parsed.r}`
+                                    }
+                                }
+                            },
+                            scales: {
+                                r: {
+                                    angleLines: { display: true },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100,
+                                    ticks: {
+                                        stepSize: 20,
+                                        display: false // Daha temiz görünüm
+                                    },
+                                    pointLabels: {
+                                        font: { size: 9 },
+                                        color: '#666'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    campaignCharts.push(chart);
+                });
+
+            } catch (e) {
+                console.error('✗ Radar Analizi hatası:', e);
+                if (container) container.innerHTML = `<p
+            style="grid-column: 1/-1; text-align: center; padding: 40px; color: #d13438;">Veri yüklenirken hata oluştu.
+        </p>`;
+            } finally {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+        }
+
+        async function loadRoomPreferenceChart() {
+            const yearSelect = document.getElementById('prefYearSelect');
+            const otelSelect = document.getElementById('prefOtelSelect');
+
+            if (!yearSelect || !otelSelect) return;
+
+            const year = yearSelect.value;
+            const otelId = otelSelect.value;
+            const loadingEl = document.getElementById('prefChartLoading');
+            const canvas = document.getElementById('roomPreferenceChart');
+
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            if (loadingEl) loadingEl.style.display = 'block';
+
+            try {
+                console.log(`➤ [OdaTercih] İstek gönderiliyor: /api/musteri/oda-tercihleri?yil=${year}&otelId=${otelId}`);
+
+                const res = await fetch(`/api/musteri/oda-tercihleri?yil=${year}&otelId=${otelId}`);
+                console.log(`➤ [OdaTercih] Response status: ${res.status}`);
+
+                if (!res.ok) {
+                    const txt = await res.text();
+                    console.error('➤ [OdaTercih] API Hatası İçerik:', txt);
+                    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+                }
+
+                const data = await res.json();
+                console.log('➤ [OdaTercih] Veri alındı:', data);
+
+                if (prefChart) {
+                    prefChart.destroy();
+                }
+
+                if (!data || !data.datasets || data.datasets.length === 0) {
+                    console.warn('➤ [OdaTercih] Dataset boş!');
+                }
+
+                prefChart = new Chart(ctx, {
+                    type: 'bar', // Grouped Bar Chart
+                    data: {
+                        labels: data.labels, // Müşteri Tipleri
+                        datasets: data.datasets // Her oda tipi için bir dataset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Müşteri Segmentleri' }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Tercih Puanı (Skor)' }
+                            }
+                        }
+                    }
+                });
+                console.log('➤ [OdaTercih] Grafik oluşturuldu.');
+
+            } catch (e) {
+                console.error('✗ Oda Tercih Analizi hatası:', e);
+            } finally {
+                console.log('➤ [OdaTercih] Yükleme tamamlandı, spinner gizleniyor.');
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+        }
+        // Preference Event Listeners
+        const prefYearSelect = document.getElementById('prefYearSelect');
+        const prefOtelSelect = document.getElementById('prefOtelSelect');
+
+        if (prefYearSelect) prefYearSelect.addEventListener('change', loadRoomPreferenceChart);
+        if (prefOtelSelect) prefOtelSelect.addEventListener('change', loadRoomPreferenceChart);
+
+        // İlk yükleme
+        setTimeout(loadRoomPreferenceChart, 1500);
+
+
+        // DOM yüklendiğinde veya zaten yüklüyse hemen çalıştır
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initAllCharts();
+            });
+        } else {
+            initAllCharts();
+        }
+    </script>
+</body>
+
+</html>
