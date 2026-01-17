@@ -2,6 +2,9 @@
 
 MVC yapısına uygun Node.js ve Express tabanlı karar destek sistemi.
 
+## Proje Tanıtımı
+Bu proje, EgeLife otel zincirine ait gelir, gider, doluluk, müşteri sayısı, oda tipi ve müşteri tipi verilerini analiz ederek yöneticilerin 12 aylık taktiksel kararlarını desteklemek amacıyla geliştirilmiş bir karar destek sistemidir. Sistem; aylara ve yıllara göre performans grafikleri, oteller arası karşılaştırmalar, kampanya etkisi analizleri, müşteri memnuniyeti değerlendirmeleri ve geleceğe yönelik gelir–doluluk tahminleri üretmektedir. Yönetici, seçtiği otel ve dönemlere göre filtreleme yaparak veri odaklı değerlendirmeler yapabilir ve işletme yönetimi için gerekli kararları planlayabilir.
+
 ## Kurulum
 
 ### 1. Bağımlılıkları Yükleyin
