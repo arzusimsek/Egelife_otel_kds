@@ -7,7 +7,7 @@ Bu proje, EgeLife otel zincirine ait gelir, gider, doluluk, müşteri sayısı, 
 
 ## Senaryo Tanımı
 
-Bu projede, Türkiye’nin farklı turizm bölgelerinde faaliyet gösteren EgeLife Otelleri adlı hayali bir otel zincirinin performansı analiz edilmiştir. Projenin amacı; otellerin müşteri davranışlarını, oda kullanım durumlarını, kampanya etkilerini ve genel finansal performanslarını veri tabanı destekli analizler ve görsel dashboardlar üzerinden incelemektir.
+Bu projede, Türkiye’nin farklı turizm bölgelerinde faaliyet gösteren EgeLife Otelleri adlı bir otel zincirinin performansı analiz edilmiştir. Projenin amacı; otellerin müşteri davranışlarını, oda kullanım durumlarını, kampanya etkilerini ve genel finansal performanslarını veri tabanı destekli analizler ve görsel dashboardlar üzerinden incelemektir.
 Proje kapsamında her otel için müşteri sayıları, oda kapasiteleri, kampanya bilgileri ve müşteri memnuniyetine ilişkin veriler tutulmuştur. Bu veriler kullanılarak otellerin aylık ve yıllık bazda gelirleri, kampanya öncesi ve sonrası müşteri değişimleri ve kâr–zarar durumları analiz edilmiştir.
 Kampanya analizlerinde, kampanya uygulanmadan önceki ve sonraki müşteri sayıları ile gelirler karşılaştırılmış, kampanyaların satışlara ve kârlılığa olan etkisi ölçülmüştür. Gelir ve kâr analizleri, daha tutarlı ve karşılaştırılabilir sonuçlar elde edebilmek amacıyla gerçekleştirilmiştir.
 Müşteri memnuniyeti analizinde, yalnızca 2025 yılına ait gerçekçi tarih bazlı memnuniyet puanları kullanılmıştır. Bu puanlar üzerinden otel bazında ortalama memnuniyet seviyeleri hesaplanmış ve müşteri memnuniyetinin gelir ve müşteri sayısı üzerindeki etkisi incelenmiştir.
